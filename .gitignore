@@ -1,3 +1,4 @@
-/food.db
-/server_settings.db
-/geckodriver.log
+/src/food.db
+/src/geckodriver.log
+/src/server_settings.db
+/venv/
