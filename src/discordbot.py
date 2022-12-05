@@ -13,7 +13,7 @@ crawling_time = [datetime.time(hour=i, minute=0, tzinfo=datetime.timezone(dateti
 
 @bot.event
 async def on_ready():
-    print('봇 실행 완료')
+    print('봇 실행 완료.')
     server_bot_settings.initial()
     menucrawler.initial()
     crawling.start()
@@ -65,9 +65,11 @@ async def 알림설정(ctx, arg='0'):
         arg = int(arg)
         if arg == 0:
             server_bot_settings.set_notification_channel(ctx.guild.id, ctx.channel.id, arg)
+            print(f'{ctx.guild.id} 서버의 {ctx.channel.id} 채널에서 알림 받을 채널 설정.')
             await ctx.send(':white_check_mark: 이제부터 이 채널에서 봇 공지사항과 학교 공지사항을 알려드립니다.')
         elif 9 <= arg <= 12:
             server_bot_settings.set_notification_channel(ctx.guild.id, ctx.channel.id, arg)
+            print(f'{ctx.guild.id} 서버의 {ctx.channel.id} 채널에서 알림 받을 채널 설정. 학식 알림 시간: {arg}시')
             await ctx.send(f':white_check_mark: 이제부터 이 채널에서 봇 공지사항과 학교 공지사항, 그리고 매일 {arg}시에 학식 메뉴를 알려드립니다.')
         else:
             raise ValueError
@@ -82,16 +84,19 @@ async def crawling():
         try:
             menucrawler.get_sc2_menu(int(today.strftime('%y%m%d')))
         except IndexError:
+            print(f'{today}에 제2학생회관 식단 크롤링 시도...')
             menucrawler.student_cafeteria_2()
         try:
             menucrawler.get_technopark_menu(int(today.strftime('%y%W')))
         except IndexError:
+            print(f'{today}에 서울테크노파크 식단 크롤링 시도...')
             menucrawler.technopark()
 
 
 @tasks.loop(time=notification_time)
 async def food_notification():
     today = datetime.datetime.now()
+    print(f'{today}에 {today.hour}시 알림 설정한 서버들을 대상으로 알림을 전송합니다.')
     for channel_id in server_bot_settings.get_channel(today.hour):
         try:
             channel = bot.get_channel(channel_id)
@@ -101,16 +106,16 @@ async def food_notification():
             continue
 
 
-@bot.command()
-async def 테스트(ctx):
-    today = datetime.datetime.now()
-    for channel_id in server_bot_settings.get_channel(10):
-        try:
-            channel = bot.get_channel(channel_id)
-            await _2학(channel)
-            await 테파(channel)
-        except Exception:
-            continue
+# @bot.command()
+# async def 테스트(ctx):
+#     today = datetime.datetime.now()
+#     for channel_id in server_bot_settings.get_channel(10):
+#         try:
+#             channel = bot.get_channel(channel_id)
+#             await _2학(channel)
+#             await 테파(channel)
+#         except Exception:
+#             continue
 
 
 bot.run(os.getenv('DiscordBotToken'))  # Insert Your Bot Token

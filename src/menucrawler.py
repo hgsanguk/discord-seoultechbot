@@ -5,6 +5,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.firefox.options import Options
 
 food_db = sqlite3.connect("food.db", isolation_level=None)
 cur = food_db.cursor()
@@ -19,10 +20,9 @@ def initial():
 
 
 def load_browser(url):
-    options = webdriver.FirefoxOptions()
-    options.add_argument('headless')
-    driver = webdriver.Firefox()
-    driver.implicitly_wait(2)
+    options = Options()
+    options.headless = True
+    driver = webdriver.Firefox(options=options)
     driver.get(url)
     return driver
 
@@ -49,12 +49,15 @@ def student_cafeteria_2():
             cur.execute('INSERT INTO Student_Cafeteria_2 VALUES(?, ?, ?, ?, ?, ?, ?)',
                         (int(datetime.date.today().strftime('%y%m%d')),
                          menu1[0], menu1[1], menu1[2], menu2[0], menu2[1], menu2[2]))
+            print('크롤링 성공!')
         except sqlite3.IntegrityError:
             cur.execute('UPDATE Student_Cafeteria_2 SET menu1_name=?, menu1_price=?, menu1_side=?,'
                         'menu2_name=?, menu2_price=?, menu2_side=? WHERE year_month_date=?',
                         (int(datetime.date.today().strftime('%y%m%d')),
                          menu1[0], menu1[1], menu1[2], menu2[0], menu2[1], menu2[2]))
+            print('크롤링 성공!')
     except NoSuchElementException:
+        print('크롤링 실패... 다음 주기에 다시 시도합니다.')
         driver.close()
 
 
@@ -76,10 +79,13 @@ def technopark():
             cur.execute('INSERT INTO TechnoPark VALUES(?, ?, ?, ?)',
                         (int(datetime.date.today().strftime('%y%W')),
                          title, uploaded_date, picture_link))
+            print('크롤링 성공!')
         except sqlite3.IntegrityError:
             cur.execute('UPDATE TechnoPark SET title=?, uploaded_date=?,'
                         'img_link=? WHERE year_week=?', (title, uploaded_date, picture_link, int(datetime.date.today().strftime('%y%W'))))
+            print('크롤링 성공!')
     except NoSuchElementException:
+        print('크롤링 실패... 다음 주기에 다시 시도합니다.')
         driver.close()
 
 
