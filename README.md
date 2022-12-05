@@ -43,7 +43,8 @@ bot.run(os.getenv('DiscordBotToken'))
 ## 파일 설명
 * `discordbot.py`: Discord 봇의 동작에 필요한 핵심적인 코드입니다.
 * `server_settings.py`: SQLite3을 이용하여 각 서버에서 설정한 알림 시간을 저장 및 수정하는 코드입니다.
-* `menucrawler.py`: 학교 홈페이지에서 식단을 크롤링하고 
+* `menucrawler.py`: SQLite3과 Selenium을 이용하여 학교 홈페이지에서 식단을 크롤링하고 데이터베이스에 저장, 불러오는 코드입니다.
+* ~~`noicecrawler.py`: SQLite3과 requests, BeautifulSoup을 이용하여 학교 공지사항을 데이터베이스에 저장, 불러오는 코드입니다.~~ (**현재 미완성**)
 
 
 ## 작동 스크린샷
