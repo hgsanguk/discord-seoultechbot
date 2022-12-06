@@ -12,7 +12,7 @@ cur = food_db.cursor()
 
 
 def initial():
-    cur.execute("CREATE TABLE IF NOT EXISTS TechnoPark (year_week integer PRIMARY KEY, title text, uploaded_date integer, img_link text)")
+    cur.execute("CREATE TABLE IF NOT EXISTS TechnoPark (year_week integer PRIMARY KEY, title text, uploaded_date integer unique, img_link text)")
     cur.execute("CREATE TABLE IF NOT EXISTS Student_Cafeteria_2 \
                 (year_month_date integer PRIMARY KEY,"
                 "menu1_name text, menu1_price text, menu1_side text,"
@@ -49,13 +49,13 @@ def student_cafeteria_2():
             cur.execute('INSERT INTO Student_Cafeteria_2 VALUES(?, ?, ?, ?, ?, ?, ?)',
                         (int(datetime.date.today().strftime('%y%m%d')),
                          menu1[0], menu1[1], menu1[2], menu2[0], menu2[1], menu2[2]))
-            print('크롤링 성공!')
+            print('제2학생회관 크롤링 성공!')
         except sqlite3.IntegrityError:
             cur.execute('UPDATE Student_Cafeteria_2 SET menu1_name=?, menu1_price=?, menu1_side=?,'
                         'menu2_name=?, menu2_price=?, menu2_side=? WHERE year_month_date=?',
                         (int(datetime.date.today().strftime('%y%m%d')),
                          menu1[0], menu1[1], menu1[2], menu2[0], menu2[1], menu2[2]))
-            print('크롤링 성공!')
+            print('제2학생회관 크롤링 성공!')
     except NoSuchElementException:
         print('크롤링 실패... 다음 주기에 다시 시도합니다.')
         driver.close()
@@ -79,11 +79,9 @@ def technopark():
             cur.execute('INSERT INTO TechnoPark VALUES(?, ?, ?, ?)',
                         (int(datetime.date.today().strftime('%y%W')),
                          title, uploaded_date, picture_link))
-            print('크롤링 성공!')
+            print('서울테크노파크 식단 크롤링 성공!')
         except sqlite3.IntegrityError:
-            cur.execute('UPDATE TechnoPark SET title=?, uploaded_date=?,'
-                        'img_link=? WHERE year_week=?', (title, uploaded_date, picture_link, int(datetime.date.today().strftime('%y%W'))))
-            print('크롤링 성공!')
+            print('크롤링 실패... 다음 주기에 다시 시도합니다.')
     except NoSuchElementException:
         print('크롤링 실패... 다음 주기에 다시 시도합니다.')
         driver.close()
@@ -98,4 +96,3 @@ def get_sc2_menu(date):
 def get_technopark_menu(week):
     cur.execute('SELECT title, img_link FROM TechnoPark WHERE year_week=?', (week,))
     return cur.fetchall()[0]
-

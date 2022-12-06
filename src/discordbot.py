@@ -3,23 +3,28 @@ import discord
 import os
 import server_bot_settings
 import menucrawler
+import noticecrawler
 from discord.ext import commands, tasks
 
 game = discord.Game('명령어: /도움')
 bot = commands.Bot(command_prefix='/', intents=discord.Intents.all())
-notification_time = [datetime.time(hour=i, minute=0, tzinfo=datetime.timezone(datetime.timedelta(hours=9))) for i in range(9, 13)]
-crawling_time = [datetime.time(hour=i, minute=0, tzinfo=datetime.timezone(datetime.timedelta(hours=9))) for i in range(0, 18, 2)]
+food_notification_time = [datetime.time(hour=i, minute=0, tzinfo=datetime.timezone(datetime.timedelta(hours=9))) for i in range(9, 13)]
+notice_crawling_time = [datetime.time(hour=i, minute=0, tzinfo=datetime.timezone(datetime.timedelta(hours=9))) for i in range(0, 24, 2)]
+food_crawling_time = [datetime.time(hour=i, minute=0, tzinfo=datetime.timezone(datetime.timedelta(hours=9))) for i in range(1, 24, 2)]
 
 
 @bot.event
 async def on_ready():
-    print('봇 실행 완료.')
     server_bot_settings.initial()
     menucrawler.initial()
-    crawling.start()
+    noticecrawler.initial()
+    food_crawling.start()
+    notice_crawling.start()
     food_notification.start()
-    await crawling()
+    await food_crawling()
+    await notice_crawling()
     await bot.change_presence(status=discord.Status.online, activity=game)
+    print('봇 실행 완료.')
 
 
 @bot.command(name="2학")
@@ -27,7 +32,7 @@ async def _2학(ctx):
     try:
         today = datetime.datetime.now()
         food_data = menucrawler.get_sc2_menu(int(today.strftime('%y%m%d')))
-        embed = discord.Embed(title="제2학생회관", description=today.strftime("%m월 %d일 식단표"))
+        embed = discord.Embed(title="제2학생회관", description=today.strftime("%#m월 %#d일 식단표"))
         embed.add_field(name=f"{food_data[0]} `{food_data[1]}`", value=f"{food_data[2]}", inline=False)
         embed.add_field(name=f"{food_data[3]} `{food_data[4]}`", value=f"{food_data[5]}", inline=False)
         await ctx.send(embed=embed)
@@ -38,11 +43,15 @@ async def _2학(ctx):
 
 @bot.command()
 async def 테파(ctx):
-    today = datetime.datetime.now()
-    food_data = menucrawler.get_technopark_menu(int(today.strftime('%y%W')))
-    embed = discord.Embed(title="테크노파크", description=f"{food_data[0]}")
-    embed.set_image(url=f"{food_data[1]}")
-    await ctx.send(embed=embed)
+    try:
+        today = datetime.datetime.now()
+        food_data = menucrawler.get_technopark_menu(int(today.strftime('%y%W')))
+        embed = discord.Embed(title="테크노파크", description=f"{food_data[0]}")
+        embed.set_image(url=f"{food_data[1]}")
+        await ctx.send(embed=embed)
+    except IndexError:
+        embed = discord.Embed(title="테크노파크", description='이번 주에 등록된 식단표가 없습니다.')
+        await ctx.send(embed=embed)
 
 
 @bot.command()
@@ -77,8 +86,8 @@ async def 알림설정(ctx, arg='0'):
         await ctx.send(':no_entry_sign: 올바르지 않은 입력입니다. 9 이상 12 이하의 정수를 입력하세요.')
 
 
-@tasks.loop(time=crawling_time)
-async def crawling():
+@tasks.loop(time=food_crawling_time)
+async def food_crawling():
     today = datetime.datetime.now()
     if today.weekday() < 5:
         try:
@@ -93,29 +102,74 @@ async def crawling():
             menucrawler.technopark()
 
 
-@tasks.loop(time=notification_time)
+@tasks.loop(time=notice_crawling_time)
+async def notice_crawling():
+    new_univ_notice = noticecrawler.univ_notice()
+    if len(new_univ_notice) > 0:
+        embed = discord.Embed(title="새 대학공지사항")
+        for row in new_univ_notice:
+            embed.add_field(name=f'{row[1]}, {row[2]}', value=f'[{row[0]}]({row[3]})', inline=False)
+
+        try:
+            print(f'알림 설정한 서버들을 대상으로 새 대학공지사항 알림을 전송합니다.')
+            for channel_id in server_bot_settings.get_channel_all():
+                try:
+                    channel = bot.get_channel(channel_id)
+                    await channel.send(embed=embed)
+                except Exception:
+                    continue
+        except IndexError:
+            print(f'알림 설정한 서버가 없습니다.')
+
+    new_univ_notice = noticecrawler.affairs_notice()
+    if len(new_univ_notice) > 0:
+        embed = discord.Embed(title="새 학사공지")
+        for row in new_univ_notice:
+            embed.add_field(name=f'{row[1]}, {row[2]}', value=f'[{row[0]}]({row[3]})', inline=False)
+
+        try:
+            print(f'알림 설정한 서버들을 대상으로 새 학사공지 알림을 전송합니다.')
+            for channel_id in server_bot_settings.get_channel_all():
+                try:
+                    channel = bot.get_channel(channel_id)
+                    await channel.send(embed=embed)
+                except Exception:
+                    continue
+        except IndexError:
+            print(f'알림 설정한 서버가 없습니다.')
+
+    new_univ_notice = noticecrawler.scholarship_notice()
+    if len(new_univ_notice) > 0:
+        embed = discord.Embed(title="새 장학공지")
+        for row in new_univ_notice:
+            embed.add_field(name=f'{row[1]}, {row[2]}', value=f'[{row[0]}]({row[3]})', inline=False)
+
+        try:
+            print(f'알림 설정한 서버들을 대상으로 새 장학공지 알림을 전송합니다.')
+            for channel_id in server_bot_settings.get_channel_all():
+                try:
+                    channel = bot.get_channel(channel_id)
+                    await channel.send(embed=embed)
+                except Exception:
+                    continue
+        except IndexError:
+            print(f'알림 설정한 서버가 없습니다.')
+
+
+@tasks.loop(time=food_notification_time)
 async def food_notification():
     today = datetime.datetime.now()
-    print(f'{today}에 {today.hour}시 알림 설정한 서버들을 대상으로 알림을 전송합니다.')
-    for channel_id in server_bot_settings.get_channel(today.hour):
-        try:
-            channel = bot.get_channel(channel_id)
-            await 테파(channel)
-            await _2학(channel)
-        except Exception:
-            continue
-
-
-# @bot.command()
-# async def 테스트(ctx):
-#     today = datetime.datetime.now()
-#     for channel_id in server_bot_settings.get_channel(10):
-#         try:
-#             channel = bot.get_channel(channel_id)
-#             await _2학(channel)
-#             await 테파(channel)
-#         except Exception:
-#             continue
+    try:
+        print(f'{today}에 {today.hour}시 알림 설정한 서버들을 대상으로 알림을 전송합니다.')
+        for channel_id in server_bot_settings.get_channel(today.hour):
+            try:
+                channel = bot.get_channel(channel_id)
+                await 테파(channel)
+                await _2학(channel)
+            except Exception:
+                continue
+    except IndexError:
+        print(f'{today}에 {today.hour}시 알림 설정한 서버가 없습니다.')
 
 
 bot.run(os.getenv('DiscordBotToken'))  # Insert Your Bot Token

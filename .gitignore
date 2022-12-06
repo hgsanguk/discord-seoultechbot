@@ -2,3 +2,5 @@
 /src/geckodriver.log
 /src/server_settings.db
 /venv/
+/src/notice.db
+/src/geckodriver.exe
