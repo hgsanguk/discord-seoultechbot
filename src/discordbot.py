@@ -5,12 +5,13 @@ import server_bot_settings
 import menucrawler
 import noticecrawler
 from discord.ext import commands, tasks
+from discord.ext.commands import has_permissions, MissingPermissions
 
 game = discord.Game('명령어: /도움')
 bot = commands.Bot(command_prefix='/', intents=discord.Intents.all())
 food_notification_time = [datetime.time(hour=i, minute=0, tzinfo=datetime.timezone(datetime.timedelta(hours=9))) for i in range(9, 13)]
-notice_crawling_time = [datetime.time(hour=i, minute=0, tzinfo=datetime.timezone(datetime.timedelta(hours=9))) for i in range(0, 24, 2)]
-food_crawling_time = [datetime.time(hour=i, minute=0, tzinfo=datetime.timezone(datetime.timedelta(hours=9))) for i in range(1, 24, 2)]
+notice_crawling_time = [datetime.time(hour=i, minute=0, tzinfo=datetime.timezone(datetime.timedelta(hours=9))) for i in range(1, 24, 2)]
+food_crawling_time = [datetime.time(hour=i, minute=0, tzinfo=datetime.timezone(datetime.timedelta(hours=9))) for i in range(0, 24, 2)]
 
 
 @bot.event
@@ -69,6 +70,7 @@ async def 도움(ctx):
 
 
 @bot.command()
+@has_permissions(administrator=True, manage_messages=True)
 async def 알림설정(ctx, arg='0'):
     try:
         arg = int(arg)
@@ -84,6 +86,12 @@ async def 알림설정(ctx, arg='0'):
             raise ValueError
     except ValueError:
         await ctx.send(':no_entry_sign: 올바르지 않은 입력입니다. 9 이상 12 이하의 정수를 입력하세요.')
+
+
+@알림설정.error
+async def 알림설정_error(ctx, error):
+    if isinstance(error, MissingPermissions):
+        await ctx.message.channel.send(':no_entry: 해당 명령어를 실행할 권한이 없습니다.')
 
 
 @tasks.loop(time=food_crawling_time)
