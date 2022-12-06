@@ -12,11 +12,15 @@ cur = food_db.cursor()
 
 
 def initial():
-    cur.execute("CREATE TABLE IF NOT EXISTS TechnoPark (year_week integer PRIMARY KEY, title text, uploaded_date integer unique, img_link text)")
+    cur.execute(
+        "CREATE TABLE IF NOT EXISTS TechnoPark (year_week integer PRIMARY KEY, title text, uploaded_date integer unique, img_link text)")
     cur.execute("CREATE TABLE IF NOT EXISTS Student_Cafeteria_2 \
                 (year_month_date integer PRIMARY KEY,"
                 "menu1_name text, menu1_price text, menu1_side text,"
-                "menu2_name text, menu2_price text, menu2_side text)")
+                "menu2_name text, menu2_price text, menu2_side text,"
+                "dinner_name text, dinner_price text, dinner_side text)")
+    cur.execute("CREATE TABLE IF NOT EXISTS Student_Cafeteria_2_Dinner \
+                (year_month_date integer PRIMARY KEY, menu_name text, menu_price text, menu_side text)")
 
 
 def load_browser(url):
@@ -34,27 +38,33 @@ def student_cafeteria_2():
             (By.CSS_SELECTOR, "div.location:nth-child(1) > label:nth-child(2) > span:nth-child(2)")))
         element.click()
         driver.implicitly_wait(4)
-        row0 = driver.find_element(By.CSS_SELECTOR,
-                                   '.dts_design > div:nth-child(5) > div:nth-child(2) > table:nth-child(1) > tbody:nth-child(2) > tr:nth-child(2)')
-        menu1 = [row0.find_element(By.CSS_SELECTOR, 'td:nth-child(1)').text,
-                 row0.find_element(By.CSS_SELECTOR, 'td:nth-child(2)').text,
-                 row0.find_element(By.CSS_SELECTOR, 'td:nth-child(3)').text]
         row1 = driver.find_element(By.CSS_SELECTOR,
-                                   '.dts_design > div:nth-child(5) > div:nth-child(2) > table:nth-child(1) > tbody:nth-child(2) > tr:nth-child(3)')
-        menu2 = [row1.find_element(By.CSS_SELECTOR, 'td:nth-child(1)').text,
+                                   '.dts_design > div:nth-child(5) > div:nth-child(2) > table:nth-child(1) > tbody:nth-child(2) > tr:nth-child(2)')
+        menu1 = [row1.find_element(By.CSS_SELECTOR, 'td:nth-child(1)').text,
                  row1.find_element(By.CSS_SELECTOR, 'td:nth-child(2)').text,
                  row1.find_element(By.CSS_SELECTOR, 'td:nth-child(3)').text]
+        row2 = driver.find_element(By.CSS_SELECTOR,
+                                   '.dts_design > div:nth-child(5) > div:nth-child(2) > table:nth-child(1) > tbody:nth-child(2) > tr:nth-child(3)')
+        menu2 = [row2.find_element(By.CSS_SELECTOR, 'td:nth-child(1)').text,
+                 row2.find_element(By.CSS_SELECTOR, 'td:nth-child(2)').text,
+                 row2.find_element(By.CSS_SELECTOR, 'td:nth-child(3)').text]
+        row3 = driver.find_element(By.CSS_SELECTOR,
+                                   '.dts_design > div:nth-child(5) > div:nth-child(4) > table:nth-child(1) > tbody:nth-child(2) > tr:nth-child(2)')
+        dinner_menu = [row3.find_element(By.CSS_SELECTOR, 'td:nth-child(1)').text,
+                       row3.find_element(By.CSS_SELECTOR, 'td:nth-child(2)').text,
+                       row3.find_element(By.CSS_SELECTOR, 'td:nth-child(3)').text]
         driver.close()
         try:
-            cur.execute('INSERT INTO Student_Cafeteria_2 VALUES(?, ?, ?, ?, ?, ?, ?)',
+            cur.execute('INSERT INTO Student_Cafeteria_2 VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
                         (int(datetime.date.today().strftime('%y%m%d')),
-                         menu1[0], menu1[1], menu1[2], menu2[0], menu2[1], menu2[2]))
+                         menu1[0], menu1[1], menu1[2], menu2[0], menu2[1], menu2[2],
+                         dinner_menu[0], dinner_menu[1], dinner_menu[2]))
             print('제2학생회관 크롤링 성공!')
         except sqlite3.IntegrityError:
             cur.execute('UPDATE Student_Cafeteria_2 SET menu1_name=?, menu1_price=?, menu1_side=?,'
-                        'menu2_name=?, menu2_price=?, menu2_side=? WHERE year_month_date=?',
-                        (int(datetime.date.today().strftime('%y%m%d')),
-                         menu1[0], menu1[1], menu1[2], menu2[0], menu2[1], menu2[2]))
+                        'menu2_name=?, menu2_price=?, menu2_side=?, dinner_name=?, dinner_price=?, dinner_side=? '
+                        'WHERE year_month_date=?',
+                        (menu1[0], menu1[1], menu1[2], menu2[0], menu2[1], menu2[2], dinner_menu[0], dinner_menu[1], dinner_menu[2], int(datetime.date.today().strftime('%y%m%d'))))
             print('제2학생회관 크롤링 성공!')
     except NoSuchElementException:
         print('크롤링 실패... 다음 주기에 다시 시도합니다.')
@@ -88,11 +98,14 @@ def technopark():
 
 
 def get_sc2_menu(date):
-    cur.execute('SELECT menu1_name, menu1_price, menu1_side,'
-                'menu2_name, menu2_price, menu2_side FROM Student_Cafeteria_2 WHERE year_month_date=?', (date,))
+    cur.execute('SELECT menu1_name, menu1_price, menu1_side, '
+                'menu2_name, menu2_price, menu2_side, '
+                'dinner_name, dinner_price, dinner_side FROM Student_Cafeteria_2 WHERE year_month_date=?', (date,))
     return cur.fetchall()[0]
 
 
 def get_technopark_menu(week):
     cur.execute('SELECT title, img_link FROM TechnoPark WHERE year_week=?', (week,))
     return cur.fetchall()[0]
+
+

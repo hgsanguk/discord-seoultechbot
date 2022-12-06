@@ -4,11 +4,13 @@ import os
 import server_bot_settings
 import menucrawler
 import noticecrawler
+from itertools import cycle
 from discord.ext import commands, tasks
 from discord.ext.commands import has_permissions, MissingPermissions
 
-game = discord.Game('명령어: /도움')
+
 bot = commands.Bot(command_prefix='/', intents=discord.Intents.all())
+global status
 food_notification_time = [datetime.time(hour=i, minute=0, tzinfo=datetime.timezone(datetime.timedelta(hours=9))) for i in range(9, 13)]
 notice_crawling_time = [datetime.time(hour=i, minute=0, tzinfo=datetime.timezone(datetime.timedelta(hours=9))) for i in range(1, 24, 2)]
 food_crawling_time = [datetime.time(hour=i, minute=0, tzinfo=datetime.timezone(datetime.timedelta(hours=9))) for i in range(0, 24, 2)]
@@ -16,15 +18,22 @@ food_crawling_time = [datetime.time(hour=i, minute=0, tzinfo=datetime.timezone(d
 
 @bot.event
 async def on_ready():
+    # DB 초기화
     server_bot_settings.initial()
     menucrawler.initial()
     noticecrawler.initial()
+
+    # task 시작
     food_crawling.start()
     notice_crawling.start()
     food_notification.start()
+    change_status.start()
+    global status
+    status = cycle(['명령어: /도움', 'v1.0-beta2', f'{len(bot.guilds)}개의 서버와 함께'])
+
     await food_crawling()
     await notice_crawling()
-    await bot.change_presence(status=discord.Status.online, activity=game)
+    await bot.change_presence(status=discord.Status.online)
     print('봇 실행 완료.')
 
 
@@ -36,9 +45,10 @@ async def _2학(ctx):
         embed = discord.Embed(title="제2학생회관", description=today.strftime("%#m월 %#d일 식단표"))
         embed.add_field(name=f"{food_data[0]} `{food_data[1]}`", value=f"{food_data[2]}", inline=False)
         embed.add_field(name=f"{food_data[3]} `{food_data[4]}`", value=f"{food_data[5]}", inline=False)
+        embed.add_field(name=f"{food_data[6]}(저녁) `{food_data[7]}`", value=f"{food_data[8]}", inline=False)
         await ctx.send(embed=embed)
     except IndexError:
-        embed = discord.Embed(title="제2학생회관", description='오늘 등록된 점심 식단표가 없습니다.')
+        embed = discord.Embed(title="제2학생회관", description='오늘 등록된 식단표가 없습니다.')
         await ctx.send(embed=embed)
 
 
@@ -163,6 +173,9 @@ async def notice_crawling():
         except IndexError:
             print(f'알림 설정한 서버가 없습니다.')
 
+    global status
+    status = cycle(['명령어: /도움', 'v1.0-beta2', f'{len(bot.guilds)}개의 서버와 함께'])
+
 
 @tasks.loop(time=food_notification_time)
 async def food_notification():
@@ -180,4 +193,10 @@ async def food_notification():
         print(f'{today}에 {today.hour}시 알림 설정한 서버가 없습니다.')
 
 
+@tasks.loop(seconds=3)
+async def change_status():
+    await bot.change_presence(activity=discord.Game(next(status)))
+
+
 bot.run(os.getenv('DiscordBotToken'))  # Insert Your Bot Token
+
