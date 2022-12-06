@@ -72,4 +72,4 @@ bot.run(os.getenv('DiscordBotToken'))
 * [디시인사이드 디스코드 마이너 갤러리: [봇 개발] 5. 디스코드 봇 만들기 - Embed](https://gall.dcinside.com/mgallery/board/view/?id=discord&no=5852): Embed 코드 작성에 참고하였습니다.
 
 ## License
-* 이 프로젝트의 라이센스는 GNU GPL 3.0이며 자세한 내용은 LICENSE를 참고하시기 바랍니다.
+* 이 프로젝트의 라이센스는 GNU GPL 3.0이며 자세한 내용은 `LICENSE`를 참고하시기 바랍니다.
