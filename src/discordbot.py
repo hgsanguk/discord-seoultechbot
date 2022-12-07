@@ -12,6 +12,7 @@ from discord.ext.commands import has_permissions, MissingPermissions
 bot = commands.Bot(command_prefix='/', intents=discord.Intents.all())
 global status
 CRAWLING_PERIOD = 2
+BOT_VERSION = 'v1.0-beta3'
 food_notification_time = [datetime.time(hour=i, minute=0, tzinfo=datetime.timezone(datetime.timedelta(hours=9))) for i in range(9, 13)]
 notice_crawling_time = [datetime.time(hour=i, minute=0, tzinfo=datetime.timezone(datetime.timedelta(hours=9))) for i in range(1, 24, CRAWLING_PERIOD)]
 food_crawling_time = [datetime.time(hour=i, minute=0, tzinfo=datetime.timezone(datetime.timedelta(hours=9))) for i in range(0, 24, CRAWLING_PERIOD)]
@@ -30,7 +31,7 @@ async def on_ready():
     food_notification.start()
     change_status.start()
     global status
-    status = cycle(['명령어: /도움', 'v1.0-beta2', f'{len(bot.guilds)}개의 서버와 함께'])
+    status = cycle(['명령어: /도움', f'{BOT_VERSION}', f'{len(bot.guilds)}개의 서버와 함께'])
 
     await food_crawling()
     await notice_crawling()
@@ -123,13 +124,17 @@ async def food_crawling():
 
 @tasks.loop(time=notice_crawling_time)
 async def notice_crawling():
+    channels = server_bot_settings.get_channel_all()
     new_univ_notice = noticecrawler.univ_notice()
-    if len(new_univ_notice) > 0:
-        embed = discord.Embed(title="새 대학공지사항")
-        for row in new_univ_notice:
-            embed.add_field(name=f'{row[1]}, {row[2]}', value=f'[{row[0]}]({row[3]})', inline=False)
+    new_affairs_notice = noticecrawler.affairs_notice()
+    new_scholarship_notice = noticecrawler.scholarship_notice()
 
-        try:
+    if len(channels) > 0:
+        if len(new_univ_notice) > 0:
+            embed = discord.Embed(title="새 대학공지사항")
+            for row in new_univ_notice:
+                embed.add_field(name=f'{row[1]}, {row[2]}', value=f'[{row[0]}]({row[3]})', inline=False)
+
             print(f'알림 설정한 서버들을 대상으로 새 대학공지사항 알림을 전송합니다.')
             for channel_id in server_bot_settings.get_channel_all():
                 try:
@@ -137,16 +142,12 @@ async def notice_crawling():
                     await channel.send(embed=embed)
                 except Exception:
                     continue
-        except IndexError:
-            print(f'알림 설정한 서버가 없습니다.')
 
-    new_univ_notice = noticecrawler.affairs_notice()
-    if len(new_univ_notice) > 0:
-        embed = discord.Embed(title="새 학사공지")
-        for row in new_univ_notice:
-            embed.add_field(name=f'{row[1]}, {row[2]}', value=f'[{row[0]}]({row[3]})', inline=False)
+        if len(new_affairs_notice) > 0:
+            embed = discord.Embed(title="새 학사공지")
+            for row in new_univ_notice:
+                embed.add_field(name=f'{row[1]}, {row[2]}', value=f'[{row[0]}]({row[3]})', inline=False)
 
-        try:
             print(f'알림 설정한 서버들을 대상으로 새 학사공지 알림을 전송합니다.')
             for channel_id in server_bot_settings.get_channel_all():
                 try:
@@ -154,16 +155,12 @@ async def notice_crawling():
                     await channel.send(embed=embed)
                 except Exception:
                     continue
-        except IndexError:
-            print(f'알림 설정한 서버가 없습니다.')
 
-    new_univ_notice = noticecrawler.scholarship_notice()
-    if len(new_univ_notice) > 0:
-        embed = discord.Embed(title="새 장학공지")
-        for row in new_univ_notice:
-            embed.add_field(name=f'{row[1]}, {row[2]}', value=f'[{row[0]}]({row[3]})', inline=False)
+        if len(new_scholarship_notice) > 0:
+            embed = discord.Embed(title="새 장학공지")
+            for row in new_univ_notice:
+                embed.add_field(name=f'{row[1]}, {row[2]}', value=f'[{row[0]}]({row[3]})', inline=False)
 
-        try:
             print(f'알림 설정한 서버들을 대상으로 새 장학공지 알림을 전송합니다.')
             for channel_id in server_bot_settings.get_channel_all():
                 try:
@@ -171,27 +168,26 @@ async def notice_crawling():
                     await channel.send(embed=embed)
                 except Exception:
                     continue
-        except IndexError:
-            print(f'알림 설정한 서버가 없습니다.')
 
     global status
-    status = cycle(['명령어: /도움', 'v1.0-beta3', f'{len(bot.guilds)}개의 서버와 함께'])
+    status = cycle(['명령어: /도움', f'{BOT_VERSION}', f'{len(bot.guilds)}개의 서버와 함께'])
 
 
 @tasks.loop(time=food_notification_time)
 async def food_notification():
-    today = datetime.datetime.now()
-    try:
-        print(f'{today}에 {today.hour}시 알림 설정한 서버들을 대상으로 알림을 전송합니다.')
-        for channel_id in server_bot_settings.get_channel(today.hour):
+    now = datetime.datetime.now()
+    channels = server_bot_settings.get_channel(now.hour)
+    if len(channels) > 0:
+        print(f'{now}에 {now.hour}시 알림 설정한 서버들을 대상으로 알림을 전송합니다.')
+        for channel_id in server_bot_settings.get_channel(now.hour):
             try:
                 channel = bot.get_channel(channel_id[0])
                 await 테파(channel)
                 await _2학(channel)
             except Exception:
                 continue
-    except IndexError:
-        print(f'{today}에 {today.hour}시 알림 설정한 서버가 없습니다.')
+    else:
+        print(f'{now} 시점에 {now.hour}시 알림 설정한 서버가 없습니다.')
 
 
 @tasks.loop(seconds=3)
