@@ -11,9 +11,10 @@ from discord.ext.commands import has_permissions, MissingPermissions
 
 bot = commands.Bot(command_prefix='/', intents=discord.Intents.all())
 global status
+CRAWLING_PERIOD = 2
 food_notification_time = [datetime.time(hour=i, minute=0, tzinfo=datetime.timezone(datetime.timedelta(hours=9))) for i in range(9, 13)]
-notice_crawling_time = [datetime.time(hour=i, minute=0, tzinfo=datetime.timezone(datetime.timedelta(hours=9))) for i in range(1, 24, 2)]
-food_crawling_time = [datetime.time(hour=i, minute=0, tzinfo=datetime.timezone(datetime.timedelta(hours=9))) for i in range(0, 24, 2)]
+notice_crawling_time = [datetime.time(hour=i, minute=0, tzinfo=datetime.timezone(datetime.timedelta(hours=9))) for i in range(1, 24, CRAWLING_PERIOD)]
+food_crawling_time = [datetime.time(hour=i, minute=0, tzinfo=datetime.timezone(datetime.timedelta(hours=9))) for i in range(0, 24, CRAWLING_PERIOD)]
 
 
 @bot.event
@@ -132,7 +133,7 @@ async def notice_crawling():
             print(f'알림 설정한 서버들을 대상으로 새 대학공지사항 알림을 전송합니다.')
             for channel_id in server_bot_settings.get_channel_all():
                 try:
-                    channel = bot.get_channel(channel_id)
+                    channel = bot.get_channel(channel_id[0])
                     await channel.send(embed=embed)
                 except Exception:
                     continue
@@ -149,7 +150,7 @@ async def notice_crawling():
             print(f'알림 설정한 서버들을 대상으로 새 학사공지 알림을 전송합니다.')
             for channel_id in server_bot_settings.get_channel_all():
                 try:
-                    channel = bot.get_channel(channel_id)
+                    channel = bot.get_channel(channel_id[0])
                     await channel.send(embed=embed)
                 except Exception:
                     continue
@@ -166,7 +167,7 @@ async def notice_crawling():
             print(f'알림 설정한 서버들을 대상으로 새 장학공지 알림을 전송합니다.')
             for channel_id in server_bot_settings.get_channel_all():
                 try:
-                    channel = bot.get_channel(channel_id)
+                    channel = bot.get_channel(channel_id[0])
                     await channel.send(embed=embed)
                 except Exception:
                     continue
@@ -174,7 +175,7 @@ async def notice_crawling():
             print(f'알림 설정한 서버가 없습니다.')
 
     global status
-    status = cycle(['명령어: /도움', 'v1.0-beta2', f'{len(bot.guilds)}개의 서버와 함께'])
+    status = cycle(['명령어: /도움', 'v1.0-beta3', f'{len(bot.guilds)}개의 서버와 함께'])
 
 
 @tasks.loop(time=food_notification_time)
@@ -184,7 +185,7 @@ async def food_notification():
         print(f'{today}에 {today.hour}시 알림 설정한 서버들을 대상으로 알림을 전송합니다.')
         for channel_id in server_bot_settings.get_channel(today.hour):
             try:
-                channel = bot.get_channel(channel_id)
+                channel = bot.get_channel(channel_id[0])
                 await 테파(channel)
                 await _2학(channel)
             except Exception:

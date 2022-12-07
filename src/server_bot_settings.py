@@ -17,9 +17,9 @@ def set_notification_channel(server, channel, notify_hour):
 
 def get_channel(hour):
     cur.execute('SELECT channel_id FROM Server WHERE notify_hour=?', (hour,))
-    return cur.fetchall()[0]
+    return cur.fetchall()
 
 
 def get_channel_all():
     cur.execute('SELECT channel_id FROM Server')
-    return cur.fetchall()[0]
+    return cur.fetchall()
