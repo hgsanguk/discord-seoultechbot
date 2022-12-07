@@ -33,8 +33,11 @@ async def on_ready():
     global status
     status = cycle(['명령어: /도움', f'{BOT_VERSION}', f'{len(bot.guilds)}개의 서버와 함께'])
 
+    noticecrawler.univ_notice()
+    noticecrawler.affairs_notice()
+    noticecrawler.scholarship_notice()
+
     await food_crawling()
-    await notice_crawling()
     await bot.change_presence(status=discord.Status.online)
     print('봇 실행 완료.')
 
@@ -136,7 +139,7 @@ async def notice_crawling():
                 embed.add_field(name=f'{row[1]}, {row[2]}', value=f'[{row[0]}]({row[3]})', inline=False)
 
             print(f'알림 설정한 서버들을 대상으로 새 대학공지사항 알림을 전송합니다.')
-            for channel_id in server_bot_settings.get_channel_all():
+            for channel_id in channels:
                 try:
                     channel = bot.get_channel(channel_id[0])
                     await channel.send(embed=embed)
@@ -149,7 +152,7 @@ async def notice_crawling():
                 embed.add_field(name=f'{row[1]}, {row[2]}', value=f'[{row[0]}]({row[3]})', inline=False)
 
             print(f'알림 설정한 서버들을 대상으로 새 학사공지 알림을 전송합니다.')
-            for channel_id in server_bot_settings.get_channel_all():
+            for channel_id in channels:
                 try:
                     channel = bot.get_channel(channel_id[0])
                     await channel.send(embed=embed)
@@ -162,7 +165,7 @@ async def notice_crawling():
                 embed.add_field(name=f'{row[1]}, {row[2]}', value=f'[{row[0]}]({row[3]})', inline=False)
 
             print(f'알림 설정한 서버들을 대상으로 새 장학공지 알림을 전송합니다.')
-            for channel_id in server_bot_settings.get_channel_all():
+            for channel_id in channels:
                 try:
                     channel = bot.get_channel(channel_id[0])
                     await channel.send(embed=embed)
@@ -179,7 +182,7 @@ async def food_notification():
     channels = server_bot_settings.get_channel(now.hour)
     if len(channels) > 0:
         print(f'{now}에 {now.hour}시 알림 설정한 서버들을 대상으로 알림을 전송합니다.')
-        for channel_id in server_bot_settings.get_channel(now.hour):
+        for channel_id in channels:
             try:
                 channel = bot.get_channel(channel_id[0])
                 await 테파(channel)
