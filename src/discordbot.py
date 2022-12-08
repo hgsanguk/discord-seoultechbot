@@ -148,7 +148,7 @@ async def notice_crawling():
 
         if len(new_affairs_notice) > 0:
             embed = discord.Embed(title="새 학사공지")
-            for row in new_univ_notice:
+            for row in new_affairs_notice:
                 embed.add_field(name=f'{row[1]}, {row[2]}', value=f'[{row[0]}]({row[3]})', inline=False)
 
             print(f'알림 설정한 서버들을 대상으로 새 학사공지 알림을 전송합니다.')
@@ -161,7 +161,7 @@ async def notice_crawling():
 
         if len(new_scholarship_notice) > 0:
             embed = discord.Embed(title="새 장학공지")
-            for row in new_univ_notice:
+            for row in new_scholarship_notice:
                 embed.add_field(name=f'{row[1]}, {row[2]}', value=f'[{row[0]}]({row[3]})', inline=False)
 
             print(f'알림 설정한 서버들을 대상으로 새 장학공지 알림을 전송합니다.')
