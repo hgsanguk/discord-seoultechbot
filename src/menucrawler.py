@@ -19,8 +19,6 @@ def initial():
                 "menu1_name text, menu1_price text, menu1_side text,"
                 "menu2_name text, menu2_price text, menu2_side text,"
                 "dinner_name text, dinner_price text, dinner_side text)")
-    cur.execute("CREATE TABLE IF NOT EXISTS Student_Cafeteria_2_Dinner \
-                (year_month_date integer PRIMARY KEY, menu_name text, menu_price text, menu_side text)")
 
 
 def load_browser(url):
