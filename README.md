@@ -48,9 +48,9 @@ discord.py를 이용하여 서울과학기술대학교의 식당의 메뉴와 �
 ### Bug Report
 문제 발생 시 반드시 **해당 서버, 채널의 ID와 함께** issue를 작성해주시기 바랍니다.
 
-
+---
 ## Getting Started with My Bot
-명령어는 Linux 환경을 기준으로 설명했으며, 명령어를 제외한 나머지 설명은 Windows 환경에서도 동일합니다.
+명령어는 python3이 설치된 Linux 환경을 기준으로 설명했으며, 명령어를 제외한 나머지 설명은 Windows 환경에서도 동일합니다.
 ### Get Code
 ```shell
 $ git clone https://github.com/az0t0/discord-seoultechbot.git
@@ -62,7 +62,7 @@ git을 사용해 위의 명령어로 최신 버전의 로컬 저장소를 clone�
 3. requests
 4. beautifulsoup4
 
-해당 패키지들은 로컬 저장소 내에서 `pip install -r techbot-packages.txt` 명령어로 한 번에 설치 가능합니다.
+해당 패키지들은 로컬 저장소 내에서 `$ pip install -r techbot-packages.txt` 명령어로 한 번에 설치 가능합니다.
 
 ### Internet Browser
 이 봇은 Selenium을 사용하므로 Web Driver를 요구합니다. 이 코드의 경우 Firefox와 이 브라우저에 쓰이는 엔진인 Gecko를 사용합니다.
@@ -114,6 +114,7 @@ $ nohup python3 discord.py > discordbot.log 2>&1 &
 ```
 백그라운드에서 봇이 실행되며, `discordbot.log` 파일에서 로그를 확인해볼 수 있습니다.
 
+---
 ## About Files
 ### Repository 내
 * `discordbot.py`: Discord 봇의 동작에 필요한 핵심적인 코드입니다.
