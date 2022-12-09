@@ -9,7 +9,7 @@ from itertools import cycle
 from discord.ext import commands, tasks
 from discord.ext.commands import has_permissions, MissingPermissions
 
-token_path = os.path.dirname(os.path.abspath(__file__)) + "/token.txt"
+token_path = os.path.dirname(os.path.abspath(__file__)) + "/token"
 token_file = open(token_path, "r", encoding="utf-8").read().split()
 discord_bot_token = token_file[0]
 weather_api_token = token_file[1]

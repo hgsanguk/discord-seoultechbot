@@ -78,8 +78,8 @@ def load_browser(url):
 ```
 
 ### Token
-Discord 봇을 만들기 위해선 Discord 계정과 [Discord Developers Portal](https://discord.com/developers/)에서 Applications > Bot의 토큰을 요구합니다.
-봇 생성 후 토큰을 발급받아서, `discord.py`의 마지막 줄을 수정하여 자신의 봇에 적용할 수 있습니다.
+Discord 봇을 만들기 위해 Discord 계정과 [Discord Developers Portal](https://discord.com/developers/)의 Applications > 내 앱 > Bot에서 모든 Intents 옵션과 토큰이 필요합니다.
+
 
 또한 `/날씨 n` 명령어를 사용하려면 [오픈 API의 기상청 단기예보 조회서비스](https://www.data.go.kr/data/15084084/openapi.do)에서 인증키를 발급 받아야 합니다.
 
@@ -89,7 +89,7 @@ Discord 봇을 만들기 위해선 Discord 계정과 [Discord Developers Portal]
 ...
 import os
 ...
-token_path = os.path.dirname(os.path.abspath(__file__)) + "/token.txt"
+token_path = os.path.dirname(os.path.abspath(__file__)) + "/token"
 token_file = open(token_path, "r", encoding="utf-8").read().split()
 discord_bot_token = token_file[0]
 weather_api_token = token_file[1]
@@ -104,8 +104,8 @@ async def 날씨(ctx, args='0'):
 ...
 bot.run(discord_bot_token)
 ```
-`discordbot.py`와 같은 경로에 `token.txt` 파일을 만들어 첫번째 줄에는 Discord 봇의 토큰, 두번째 줄에는 오픈 API에서 발급받은 일반 인증키를 입력하면 됩니다.
-**토큰 노출 예방을 위해 `token.txt` 파일이 `.gitignore`에 추가 되어있는지 반드시 확인하세요.**
+`discordbot.py`와 같은 경로에 `token` 파일(확장자 없음)을 만들어 첫번째 줄에는 **Discord 봇의 토큰**, 두번째 줄에는 오픈 API에서 발급받은 **일반 인증키**를 입력하면 됩니다.
+**토큰 노출 예방을 위해 `token` 파일이 `.gitignore`에 추가 되어있는지 반드시 확인하세요.**
 
 ### Run
 ```shell
@@ -113,6 +113,8 @@ $ cd /discord-seoultechbot/src
 $ nohup python3 discord.py > discordbot.log 2>&1 &
 ```
 백그라운드에서 봇이 실행되며, `discordbot.log` 파일에서 로그를 확인해볼 수 있습니다.
+[Discord Developers Portal](https://discord.com/developers/)의 Applications > 내 앱 > OAuth2에서 bot 체크 후 생성되는 링크를 통해 봇을 초대할 수 있습니다.
+
 
 ---
 ## About Files
