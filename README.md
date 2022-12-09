@@ -78,10 +78,7 @@ def load_browser(url):
 ```
 
 ### Token
-Discord 봇을 만들기 위해 Discord 계정과 [Discord Developers Portal](https://discord.com/developers/)의 Applications > 내 앱 > Bot에서 모든 Intents 옵션과 토큰이 필요합니다.
-
-
-또한 `/날씨 n` 명령어를 사용하려면 [오픈 API의 기상청 단기예보 조회서비스](https://www.data.go.kr/data/15084084/openapi.do)에서 인증키를 발급 받아야 합니다.
+Discord 봇을 만들기 위해 Discord 계정, [Discord Developers Portal](https://discord.com/developers/)의 Applications > 내 앱 > Bot에서 모든 Intents 옵션과 토큰이 필요합니다. 또한 `/날씨 n` 명령어를 사용하려면 [오픈 API의 기상청 단기예보 조회서비스](https://www.data.go.kr/data/15084084/openapi.do)에서 인증키를 발급 받아야 합니다.
 
 토큰을 요구하는 부분은 아래와 같습니다.
 
