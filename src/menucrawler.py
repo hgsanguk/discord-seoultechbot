@@ -65,7 +65,7 @@ def student_cafeteria_2():
                         (menu1[0], menu1[1], menu1[2], menu2[0], menu2[1], menu2[2], dinner_menu[0], dinner_menu[1], dinner_menu[2], int(datetime.date.today().strftime('%y%m%d'))))
             print('제2학생회관 크롤링 성공!')
     except NoSuchElementException:
-        print('크롤링 실패... 다음 주기에 다시 시도합니다.')
+        print('크롤링 실패. 다음 주기에 다시 시도합니다. (오늘의 식단표 없음)')
         driver.close()
 
 
@@ -89,9 +89,9 @@ def technopark():
                          title, uploaded_date, picture_link))
             print('서울테크노파크 식단 크롤링 성공!')
         except sqlite3.IntegrityError:
-            print('크롤링 실패... 다음 주기에 다시 시도합니다.')
+            print('크롤링 실패. 다음 주기에 다시 시도합니다. (지난주 게시글 크롤링 시도)')
     except NoSuchElementException:
-        print('크롤링 실패... 다음 주기에 다시 시도합니다.')
+        print('크롤링 실패. 다음 주기에 다시 시도합니다. (페이지의 레이아웃 변경됨)')
         driver.close()
 
 

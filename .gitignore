@@ -4,3 +4,5 @@
 /venv/
 /src/notice.db
 /src/geckodriver.exe
+/src/token.txt
+/src/discordbot.log
