@@ -21,7 +21,7 @@ print("오픈 API 기상청 단기예보 조회서비스 Token: ", weather_api_t
 bot = commands.Bot(command_prefix='/', intents=discord.Intents.all())
 global status
 CRAWLING_PERIOD = 2
-BOT_VERSION = 'v1.0-beta3'
+BOT_VERSION = 'v1.0-beta.3'
 food_notification_time = [datetime.time(hour=i, minute=0,
                                         tzinfo=datetime.timezone(datetime.timedelta(hours=9))) for i in range(9, 13)]
 notice_crawling_time = [datetime.time(hour=i, minute=30,
@@ -88,77 +88,80 @@ async def 날씨(ctx, args='0'):
     try:
         args = int(args)
         if 0 <= args < 5:
-            data = weather.get_weather(weather_api_token, args)
+            try:
+                data = weather.get_weather(weather_api_token, args)
 
-            if 8 <= data[0].hour <= 16:
-                color = 0x99CCFF
-            elif 5 <= data[0].hour < 8:
-                color = 0xFAEBD7
-            elif 16 < data[0].hour < 19:
-                color = 0xF29886
-            else:
-                color = 0x000080
+                if 8 <= data[0].hour <= 16:
+                    color = 0x99CCFF
+                elif 5 <= data[0].hour < 8:
+                    color = 0xFAEBD7
+                elif 16 < data[0].hour < 19:
+                    color = 0xF29886
+                else:
+                    color = 0x000080
 
-            embed = discord.Embed(title="오늘의 캠퍼스 날씨",
-                                  description='{day.month}월 {day.month}일 {day.hour}시 {day.minute}분 공릉동의 날씨입니다.'
-                                  .format(day=data[0]), color=color)
+                embed = discord.Embed(title="오늘의 캠퍼스 날씨",
+                                      description='{day.month}월 {day.day}일 {day.hour}시 {day.minute}분 공릉동의 날씨입니다.'
+                                      .format(day=data[0]), color=color)
 
-            if data[2][3] == '1':
-                embed.add_field(name=':umbrella: 비\n'
-                                     ':cloud_snow: 강수량 :' + data[2][4] + '\n'
-                                     ':thermometer: 기온: ' + data[2][0] + '°C',
-                                value=':droplet: 습도: ' + data[2][5] + '%\n'
-                                      ':dash: 바람: ' + data[2][7] + '(' + data[2][6] + '°) 방향으로 ' + data[2][8] + 'm/s',
-                                inline=False)
-            elif data[2][3] == '2':
-                embed.add_field(name=':umbrella: 눈비\n'
-                                     ':cloud_snow: 강수량 :' + data[2][4] + '\n'
-                                     ':thermometer: 기온: ' + data[2][0] + '°C',
-                                value=':droplet: 습도: ' + data[2][5] + '%\n'
-                                      ':dash: 바람: ' + data[2][7] + '(' + data[2][6] + '°) 방향으로 ' + data[2][8] + 'm/s',
-                                inline=False)
-            elif data[2][3] == '3':
-                embed.add_field(name=':snowman2: 눈\n'
-                                     ':cloud_snow: 강수량 :' + data[2][4] + '\n'
-                                     ':thermometer: 기온: ' + data[2][0] + '°C',
-                                value=':droplet: 습도: ' + data[2][5] + '%\n'
-                                      ':dash: 바람: ' + data[2][7] + '(' + data[2][6] + '°) 방향으로 ' + data[2][8] + 'm/s',
-                                inline=False)
-            elif data[2][3] == '4':
-                embed.add_field(name=':white_sun_rain_cloud: 소나기\n'
-                                     ':cloud_snow: 강수량 :' + data[2][4] + '\n'
-                                     ':thermometer: 기온: ' + data[2][0] + '°C',
-                                value=':droplet: 습도: ' + data[2][5] + '%\n'
-                                      ':dash: 바람: ' + data[2][7] + '(' + data[2][6] + '°) 방향으로 ' + data[2][8] + 'm/s',
-                                inline=False)
-            elif data[2][3] == '5':
-                embed.add_field(name=':sweat_drops: 빗방울\n'
-                                     ':cloud_snow: 강수량 :' + data[2][4] + '\n'
-                                     ':thermometer: 기온: ' + data[2][0] + '°C',
-                                value=':droplet: 습도: ' + data[2][5] + '%\n'
-                                      ':dash: 바람: ' + data[2][7] + '(' + data[2][6] + '°) 방향으로 ' + data[2][8] + 'm/s',
-                                inline=False)
-            elif data[2][3] == '6':
-                embed.add_field(name=':umbrella: 싸락눈/빗방울\n'
-                                     ':cloud_snow: 강수량 :' + data[2][4] + '\n'
-                                     ':thermometer: 기온: ' + data[2][0] + '°C',
-                                value=':droplet: 습도: ' + data[2][5] + '%\n'
-                                      ':dash: 바람: ' + data[2][7] + '(' + data[2][6] + '°) 방향으로 ' + data[2][8] + 'm/s',
-                                inline=False)
-            elif data[2][3] == '7':
-                embed.add_field(name=':snowflake: 싸락눈\n'
-                                     ':cloud_snow: 강수량 :' + data[2][4] + '\n'
-                                     ':thermometer: 기온: ' + data[2][0] + '°C',
-                                value=':droplet: 습도: ' + data[2][5] + '%\n'
-                                      ':dash: 바람: ' + data[2][7] + '(' + data[2][6] + '°) 방향으로 ' + data[2][8] + 'm/s',
-                                inline=False)
-            else:
-                embed.add_field(name=data[2][2] + '\n:thermometer: 기온: ' + data[2][0] + '°C',
-                                value=':droplet: 습도: ' + data[2][5] + '%\n:dash: 바람: ' + data[2][7] + '(' + data[2][6]
-                                      + '°) 방향으로 ' + data[2][8] + 'm/s', inline=False)
+                if data[2][3] == '1':
+                    embed.add_field(name=':umbrella: 비\n'
+                                         ':cloud_snow: 강수량 :' + data[2][4] + '\n'
+                                         ':thermometer: 기온: ' + data[2][0] + '°C',
+                                    value=':droplet: 습도: ' + data[2][5] + '%\n'
+                                          ':dash: 바람: ' + data[2][7] + '(' + data[2][6] + '°) 방향으로 ' + data[2][8] + 'm/s',
+                                    inline=False)
+                elif data[2][3] == '2':
+                    embed.add_field(name=':umbrella: 눈비\n'
+                                         ':cloud_snow: 강수량 :' + data[2][4] + '\n'
+                                         ':thermometer: 기온: ' + data[2][0] + '°C',
+                                    value=':droplet: 습도: ' + data[2][5] + '%\n'
+                                          ':dash: 바람: ' + data[2][7] + '(' + data[2][6] + '°) 방향으로 ' + data[2][8] + 'm/s',
+                                    inline=False)
+                elif data[2][3] == '3':
+                    embed.add_field(name=':snowman2: 눈\n'
+                                         ':cloud_snow: 강수량 :' + data[2][4] + '\n'
+                                         ':thermometer: 기온: ' + data[2][0] + '°C',
+                                    value=':droplet: 습도: ' + data[2][5] + '%\n'
+                                          ':dash: 바람: ' + data[2][7] + '(' + data[2][6] + '°) 방향으로 ' + data[2][8] + 'm/s',
+                                    inline=False)
+                elif data[2][3] == '4':
+                    embed.add_field(name=':white_sun_rain_cloud: 소나기\n'
+                                         ':cloud_snow: 강수량 :' + data[2][4] + '\n'
+                                         ':thermometer: 기온: ' + data[2][0] + '°C',
+                                    value=':droplet: 습도: ' + data[2][5] + '%\n'
+                                          ':dash: 바람: ' + data[2][7] + '(' + data[2][6] + '°) 방향으로 ' + data[2][8] + 'm/s',
+                                    inline=False)
+                elif data[2][3] == '5':
+                    embed.add_field(name=':sweat_drops: 빗방울\n'
+                                         ':cloud_snow: 강수량 :' + data[2][4] + '\n'
+                                         ':thermometer: 기온: ' + data[2][0] + '°C',
+                                    value=':droplet: 습도: ' + data[2][5] + '%\n'
+                                          ':dash: 바람: ' + data[2][7] + '(' + data[2][6] + '°) 방향으로 ' + data[2][8] + 'm/s',
+                                    inline=False)
+                elif data[2][3] == '6':
+                    embed.add_field(name=':umbrella: 싸락눈/빗방울\n'
+                                         ':cloud_snow: 강수량 :' + data[2][4] + '\n'
+                                         ':thermometer: 기온: ' + data[2][0] + '°C',
+                                    value=':droplet: 습도: ' + data[2][5] + '%\n'
+                                          ':dash: 바람: ' + data[2][7] + '(' + data[2][6] + '°) 방향으로 ' + data[2][8] + 'm/s',
+                                    inline=False)
+                elif data[2][3] == '7':
+                    embed.add_field(name=':snowflake: 싸락눈\n'
+                                         ':cloud_snow: 강수량 :' + data[2][4] + '\n'
+                                         ':thermometer: 기온: ' + data[2][0] + '°C',
+                                    value=':droplet: 습도: ' + data[2][5] + '%\n'
+                                          ':dash: 바람: ' + data[2][7] + '(' + data[2][6] + '°) 방향으로 ' + data[2][8] + 'm/s',
+                                    inline=False)
+                else:
+                    embed.add_field(name=data[2][2] + '\n:thermometer: 기온: ' + data[2][0] + '°C',
+                                    value=':droplet: 습도: ' + data[2][5] + '%\n:dash: 바람: ' + data[2][7] + '(' + data[2][6]
+                                          + '°) 방향으로 ' + data[2][8] + 'm/s', inline=False)
 
-            embed.set_footer(text='기상청 초단기예보 조회 서비스 오픈 API를 이용한 것으로, 실제 기상상황과 차이가 있을 수 있습니다.')
-            await ctx.send(embed=embed)
+                embed.set_footer(text='기상청 초단기예보 조회 서비스 오픈 API를 이용한 것으로, 실제 기상상황과 차이가 있을 수 있습니다.')
+                await ctx.send(embed=embed)
+            except ValueError:
+                await ctx.send('날씨 정보를 불러오는 중 오류가 발생했습니다.')
         else:
             raise ValueError
     except ValueError:
