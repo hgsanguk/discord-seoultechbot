@@ -1,11 +1,12 @@
 import datetime
-import discord
 import os
+from itertools import cycle
+import discord
+
 import server_bot_settings
 import menucrawler
 import noticecrawler
 import weather
-from itertools import cycle
 from discord.ext import commands, tasks
 from discord.ext.commands import has_permissions, MissingPermissions
 
@@ -65,7 +66,7 @@ async def _2학(ctx):
         embed.add_field(name=f"{food_data[6]}(저녁) `{food_data[7]}`", value=f"{food_data[8]}", inline=False)
         await ctx.send(embed=embed)
     except IndexError:
-        embed = discord.Embed(title="제2학생회관", description='오늘 등록된 식단표가 없습니다.')
+        embed = discord.Embed(title="제2학생회관", description='오늘 등록된 식단표가 없습니다.', color=0x73BF1F)
         await ctx.send(embed=embed)
 
 
@@ -78,7 +79,7 @@ async def 테파(ctx):
         embed.set_image(url=f"{food_data[1]}")
         await ctx.send(embed=embed)
     except IndexError:
-        embed = discord.Embed(title="테크노파크", description='이번 주에 등록된 식단표가 없습니다.')
+        embed = discord.Embed(title="테크노파크", description='이번 주에 등록된 식단표가 없습니다.', color=0x0950A1)
         await ctx.send(embed=embed)
 
 
@@ -161,14 +162,14 @@ async def 날씨(ctx, args='0'):
         else:
             raise ValueError
     except ValueError:
-        await ctx.send(':no_entry_sign: 올바르지 않은 입력입니다. 4 이하의 정수를 입력하세요.')
+        await ctx.send(':no_entry_sign: 올바르지 않은 입력입니다. 0 이상 4 이하의 정수를 입력하세요.')
     except Exception:
         await ctx.send('날씨 정보를 불러오는 중 오류가 발생했습니다.')
 
 
 @bot.command()
 async def 도움(ctx):
-    embed = discord.Embed(title="봇 명령어 목록")
+    embed = discord.Embed(title="봇 명령어 목록", color=0x711E92)
     embed.add_field(name=':warning:주의사항:warning:', value='**봇 입장 후 `/알림설정` 명령어를 사용해야 봇 & 학교 공지사항을 받을 수 있습니다.**\n'
                                                          '학교 공지사항은 학교 홈페이지의 **대학공지사항, 학사공지, 장학공지**를 알려드립니다. '
                                                          '이외의 공지사항은 학교 홈페이지를 참고하시기 바랍니다.\n', inline=False)
@@ -282,18 +283,19 @@ async def notice_crawling():
 @tasks.loop(time=food_notification_time)
 async def food_notification():
     now = datetime.datetime.now()
-    channels = server_bot_settings.get_channel(now.hour)
-    if len(channels) > 0:
-        print(f'{now}에 {now.hour}시 알림 설정한 서버들을 대상으로 알림을 전송합니다.')
-        for channel_id in channels:
-            try:
-                channel = bot.get_channel(channel_id[0])
-                await 테파(channel)
-                await _2학(channel)
-            except Exception:
-                continue
-    else:
-        print(f'{now} 시점에 {now.hour}시 알림 설정한 서버가 없습니다.')
+    if now.weekday() < 5:
+        channels = server_bot_settings.get_channel(now.hour)
+        if len(channels) > 0:
+            print(f'{now}에 {now.hour}시 알림 설정한 서버들을 대상으로 알림을 전송합니다.')
+            for channel_id in channels:
+                try:
+                    channel = bot.get_channel(channel_id[0])
+                    await 테파(channel)
+                    await _2학(channel)
+                except Exception:
+                    continue
+        else:
+            print(f'{now} 시점에 {now.hour}시 알림 설정한 서버가 없습니다.')
 
 
 @tasks.loop(seconds=3)
