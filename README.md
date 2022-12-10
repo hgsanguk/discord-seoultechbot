@@ -107,7 +107,7 @@ bot.run(discord_bot_token)
 ### Run
 ```shell
 $ cd /discord-seoultechbot/src
-$ nohup python3 discord.py > discordbot.log 2>&1 &
+$ nohup python3 discordbot.py > discordbot.log 2>&1 &
 ```
 백그라운드에서 봇이 실행되며, `discordbot.log` 파일에서 로그를 확인해볼 수 있습니다.
 [Discord Developers Portal](https://discord.com/developers/)의 Applications > 내 앱 > OAuth2에서 bot 체크 후 생성되는 링크를 통해 봇을 초대할 수 있습니다.
