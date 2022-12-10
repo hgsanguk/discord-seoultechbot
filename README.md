@@ -43,7 +43,15 @@ discord.py를 이용하여 서울과학기술대학교의 식당의 메뉴와 �
 
 
 ### Working Screenshots
-작성 중...
+#### 식단과 공지사항 푸시 알림
+![image](https://user-images.githubusercontent.com/113516890/206862508-516112ca-da61-4523-8d1c-5795b324b2c5.png) 
+![공지사항 자동알림](https://user-images.githubusercontent.com/113516890/206861974-21cf87f6-96b2-40a4-a3f8-40be6b34bc3d.png)
+
+#### `/2학`, `/테파` 명령어 사용
+![image](https://user-images.githubusercontent.com/113516890/206862621-30b66c90-a622-429f-a106-0aab78c7af6b.png)
+
+#### `/날씨 n` 명령어 사용
+![image](https://user-images.githubusercontent.com/113516890/206862730-133609f4-e0a2-414e-a997-8c6b68b84432.png)
 
 ### Bug Report
 문제 발생 시 반드시 **해당 서버, 채널의 ID와 함께** issue를 작성해주시기 바랍니다.
@@ -78,7 +86,8 @@ def load_browser(url):
 ```
 
 ### Token
-Discord 봇을 만들기 위해 Discord 계정, [Discord Developers Portal](https://discord.com/developers/)의 Applications > 내 앱 > Bot에서 모든 Intents 옵션과 토큰이 필요합니다. 또한 `/날씨 n` 명령어를 사용하려면 [오픈 API의 기상청 단기예보 조회서비스](https://www.data.go.kr/data/15084084/openapi.do)에서 인증키를 발급 받아야 합니다.
+Discord 봇을 만들기 위해 Discord 계정, [Discord Developers Portal](https://discord.com/developers/)의 Applications > 내 앱 > Bot에서 모든 Intents 옵션과 토큰이 필요합니다.
+또한 `/날씨 n` 명령어를 사용하려면 [오픈 API의 기상청 단기예보 조회서비스](https://www.data.go.kr/data/15084084/openapi.do)에서 인증키를 발급 받아야 합니다.
 
 토큰을 요구하는 부분은 아래와 같습니다.
 
@@ -107,7 +116,7 @@ bot.run(discord_bot_token)
 ### Run
 ```shell
 $ cd /discord-seoultechbot/src
-$ nohup python3 discordbot.py > discordbot.log 2>&1 &
+$ nohup python3 -u discordbot.py > discordbot.log 2>&1 &
 ```
 백그라운드에서 봇이 실행되며, `discordbot.log` 파일에서 로그를 확인해볼 수 있습니다.
 [Discord Developers Portal](https://discord.com/developers/)의 Applications > 내 앱 > OAuth2에서 bot 체크 후 생성되는 링크를 통해 봇을 초대할 수 있습니다.
