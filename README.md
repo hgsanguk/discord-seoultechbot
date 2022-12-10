@@ -58,19 +58,19 @@ discord.py를 이용하여 서울과학기술대학교의 식당의 메뉴와 �
 
 ---
 ## Getting Started with My Bot
-명령어는 python3이 설치된 Linux 환경을 기준으로 설명했으며, 명령어를 제외한 나머지 설명은 Windows 환경에서도 동일합니다.
+명령어는 git과 python3이 설치된 Linux 환경을 기준으로 설명했으며, 명령어를 제외한 나머지 설명은 Windows 환경에서도 동일합니다.
 ### Get Code
 ```shell
 $ git clone https://github.com/az0t0/discord-seoultechbot.git
 ```
-git을 사용해 위의 명령어로 최신 버전의 로컬 저장소를 clone하거나, Releases에서 안정적인 버전의 코드를 내려받을 수 있습니다.
+git을 사용해 위의 명령어로 이 Repository를 clone하여 최신 버전의 코드를 받거나, Releases에서 안정적인 버전의 코드를 내려받을 수 있습니다.
 ### Require Packages
 1. discord.py
 2. selenium
 3. requests
 4. beautifulsoup4
 
-해당 패키지들은 로컬 저장소 내에서 `$ pip install -r techbot-packages.txt` 명령어로 한 번에 설치 가능합니다.
+해당 패키지들은 로컬 저장소 디렉토리 내에서 `$ pip install -r techbot-packages.txt` 명령어로 한 번에 설치 가능합니다.
 
 ### Internet Browser
 이 봇은 Selenium을 사용하므로 Web Driver를 요구합니다. 이 코드의 경우 Firefox와 이 브라우저에 쓰이는 엔진인 Gecko를 사용합니다.
