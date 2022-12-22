@@ -1,6 +1,6 @@
 import sqlite3
 import requests
-from bs4 import BeautifulSoup as bs
+from bs4 import BeautifulSoup
 
 notice_db = sqlite3.connect("notice.db", isolation_level=None)
 cur = notice_db.cursor()
@@ -10,28 +10,23 @@ def initial():
     cur.execute("CREATE TABLE IF NOT EXISTS University (board_index integer PRIMARY KEY)")
     cur.execute("CREATE TABLE IF NOT EXISTS Affairs (board_index integer PRIMARY KEY)")
     cur.execute("CREATE TABLE IF NOT EXISTS Scholarship (board_index integer PRIMARY KEY)")
+    cur.execute("CREATE TABLE IF NOT EXISTS Dormitory (board_index integer PRIMARY KEY)")
 
 
-def requests_board(url):
-    response = requests.get(url)
-    parser = bs(response.text, "html.parser")
+def get_notice(board_name, table_name):
+    response = requests.get('https://www.seoultech.ac.kr/service/info/' + board_name + '/')
+    parser = BeautifulSoup(response.text, "html.parser")
     rows = parser.select('.tbl_list > tbody:nth-child(4) > tr')
-    return rows
-
-
-def univ_notice():
-    rows = requests_board('https://www.seoultech.ac.kr/service/info/notice/')
     new_notice = []
     for row in rows:
         try:
             title = row.select('td:nth-child(2) > a')[0].text.strip()
             author = row.select('td:nth-child(4)')[0].text.strip()
-            date = row.select('td:nth-child(5)')[0].text.strip()
             url = row.select('td:nth-child(2) > a')[0].get('href')
             bidx = int(url.split('&')[5].strip('bidx='))
             try:
-                cur.execute('INSERT INTO University VALUES(?)', (bidx,))
-                new_notice.append([title, author, date, 'https://www.seoultech.ac.kr/service/info/notice' + url])
+                cur.execute('INSERT INTO ' + table_name + ' VALUES(?)', (bidx,))
+                new_notice.append([title, author, 'https://www.seoultech.ac.kr/service/info/' + board_name + url])
             except sqlite3.IntegrityError:
                 continue
         except IndexError:
@@ -39,41 +34,24 @@ def univ_notice():
     return new_notice
 
 
-def affairs_notice():
-    rows = requests_board('https://www.seoultech.ac.kr/service/info/matters/')
+def get_domi_notice():
+    response = requests.get('https://domi.seoultech.ac.kr/do/notice/')
+    parser = BeautifulSoup(response.text, "html.parser")
+    rows = parser.select('.list_3 > li')
     new_notice = []
     for row in rows:
+        title = row.select('a:nth-child(1)')[0].text.strip()
+        url = row.select('a:nth-child(1)')[0].get('href')
+        bidx = int(url.split('&')[2].strip('bidx='))
         try:
-            title = row.select('td:nth-child(2) > a')[0].text.strip()
-            author = row.select('td:nth-child(4)')[0].text.strip()
-            date = row.select('td:nth-child(5)')[0].text.strip()
-            url = row.select('td:nth-child(2) > a')[0].get('href')
-            bidx = int(url.split('&')[5].strip('bidx='))
+            cur.execute('INSERT INTO Dormitory VALUES(?)', (bidx,))
+            response = requests.get('https://domi.seoultech.ac.kr/do/notice/' + url)
+            parser = BeautifulSoup(response.text, "html.parser")
             try:
-                cur.execute('INSERT INTO Affairs VALUES(?)', (bidx,))
-                new_notice.append([title, author, date, 'https://www.seoultech.ac.kr/service/info/matters' + url])
-            except sqlite3.IntegrityError:
-                continue
-        except IndexError:
-            continue
-    return new_notice
-
-
-def scholarship_notice():
-    rows = requests_board('https://www.seoultech.ac.kr/service/info/janghak')
-    new_notice = []
-    for row in rows:
-        try:
-            title = row.select('td:nth-child(2) > a')[0].text.strip()
-            author = row.select('td:nth-child(4)')[0].text.strip()
-            date = row.select('td:nth-child(5)')[0].text.strip()
-            url = row.select('td:nth-child(2) > a')[0].get('href')
-            bidx = int(url.split('&')[5].strip('bidx='))
-            try:
-                cur.execute('INSERT INTO Scholarship VALUES(?)', (bidx,))
-                new_notice.append([title, author, date, 'https://www.seoultech.ac.kr/service/info/janghak' + url])
-            except sqlite3.IntegrityError:
-                continue
-        except IndexError:
+                author = parser.select('.date > span:nth-child(2) > font:nth-child(1)')[0].text
+            except IndexError:
+                author = parser.select('.date > span:nth-child(3) > font:nth-child(1)')[0].text
+            new_notice.append([title, author, 'https://domi.seoultech.ac.kr/do/notice/' + url])
+        except sqlite3.IntegrityError:
             continue
     return new_notice

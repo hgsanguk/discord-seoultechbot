@@ -21,7 +21,7 @@ print("오픈 API 기상청 단기예보 조회서비스 Token: ", weather_api_t
 bot = commands.Bot(command_prefix='/', intents=discord.Intents.all())
 global status
 CRAWLING_PERIOD = 2
-BOT_VERSION = 'v1.0-beta.3'
+BOT_VERSION = 'v1.0-beta.4'
 food_notification_time = [datetime.time(hour=i, minute=0,
                                         tzinfo=datetime.timezone(datetime.timedelta(hours=9))) for i in range(9, 13)]
 notice_crawling_time = [datetime.time(hour=i, minute=30,
@@ -45,9 +45,8 @@ async def on_ready():
     global status
     status = cycle(['명령어: /도움', f'{BOT_VERSION}', f'{len(bot.guilds)}개의 서버와 함께'])
 
-    noticecrawler.univ_notice()
-    noticecrawler.affairs_notice()
-    noticecrawler.scholarship_notice()
+    noticecrawler.get_notice('matters', 'Affairs')
+    noticecrawler.get_notice('janghak', 'Scholarship')
 
     await food_crawling()
     await bot.change_presence(status=discord.Status.online)
@@ -185,6 +184,8 @@ async def 도움(ctx):
     await ctx.send(embed=embed)
 
 
+# 여기서부터 봇 설정 관련 명령어입니다.
+
 @bot.command()
 @has_permissions(administrator=True, manage_messages=True)
 async def 알림설정(ctx, arg='0'):
@@ -210,6 +211,27 @@ async def 알림설정_error(ctx, error):
         await ctx.message.channel.send(':no_entry: 해당 명령어를 실행할 권한이 없습니다.')
 
 
+@bot.command()
+@has_permissions(administrator=True, manage_messages=True)
+async def 기숙사공지(ctx):
+    try:
+        result = server_bot_settings.set_dormitory_notification(ctx.guild.id)
+        if result[1] == 0:
+            print(f'{ctx.guild.name}({ctx.guild.id}) 서버의 {bot.get_channel(result[0]).name}({result[0]}) 채널에서 기숙사 알림 켬')
+            await ctx.message.channel.send(':bell: 기숙사 알림을 켰습니다.')
+        else:
+            print(f'{ctx.guild.name}({ctx.guild.id}) 서버의 {bot.get_channel(result[0]).name}({result[0]}) 채널에서 기숙사 알림 끔')
+            await ctx.message.channel.send(':no_bell: 기숙사 알림을 껐습니다.')
+    except IndexError:
+        await ctx.message.channel.send(':warning: `/알림설정` 명령어를 사용하지 않았습니다. `/알림설정` 명령어 입력 후 다시 시도해주세요.')
+
+
+@기숙사공지.error
+async def 기숙사공지_error(ctx, error):
+    if isinstance(error, MissingPermissions):
+        await ctx.message.channel.send(':no_entry: 해당 명령어를 실행할 권한이 없습니다.')
+
+
 @tasks.loop(time=food_crawling_time)
 async def food_crawling():
     today = datetime.datetime.now()
@@ -229,21 +251,24 @@ async def food_crawling():
 @tasks.loop(time=notice_crawling_time)
 async def notice_crawling():
     channels = server_bot_settings.get_channel_all()
+    print(f'{datetime.datetime.now()}에 공지사항 크롤링 시도...')
     try:
-        new_univ_notice = noticecrawler.univ_notice()
-        new_affairs_notice = noticecrawler.affairs_notice()
-        new_scholarship_notice = noticecrawler.scholarship_notice()
+        new_univ_notice = noticecrawler.get_notice('notice', 'University')
+        new_affairs_notice = noticecrawler.get_notice('matters', 'Affairs')
+        new_scholarship_notice = noticecrawler.get_notice('janghak', 'Scholarship')
+        new_dormitory_notice = noticecrawler.get_domi_notice()
     except ConnectionError:
         new_univ_notice = []
         new_affairs_notice = []
         new_scholarship_notice = []
+        new_dormitory_notice = []
         print('학교 홈페이지 연결 실패. 다음 주기에 다시 시도합니다.')
 
     if len(channels) > 0:
         if len(new_univ_notice) > 0:
             embed = discord.Embed(title="새 대학공지사항", color=0xA4343A)
             for row in new_univ_notice:
-                embed.add_field(name=f'{row[1]}, {row[2]}', value=f'[{row[0]}]({row[3]})', inline=False)
+                embed.add_field(name=f'{row[1]}', value=f'[{row[0]}]({row[2]})', inline=False)
 
             print(f'알림 설정한 서버들을 대상으로 새 대학공지사항 알림을 전송합니다.')
             for channel_id in channels:
@@ -256,7 +281,7 @@ async def notice_crawling():
         if len(new_affairs_notice) > 0:
             embed = discord.Embed(title="새 학사공지", color=0x00205B)
             for row in new_affairs_notice:
-                embed.add_field(name=f'{row[1]}, {row[2]}', value=f'[{row[0]}]({row[3]})', inline=False)
+                embed.add_field(name=f'{row[1]}', value=f'[{row[0]}]({row[2]})', inline=False)
 
             print(f'알림 설정한 서버들을 대상으로 새 학사공지 알림을 전송합니다.')
             for channel_id in channels:
@@ -269,7 +294,7 @@ async def notice_crawling():
         if len(new_scholarship_notice) > 0:
             embed = discord.Embed(title="새 장학공지", color=0x333F48)
             for row in new_scholarship_notice:
-                embed.add_field(name=f'{row[1]}, {row[2]}', value=f'[{row[0]}]({row[3]})', inline=False)
+                embed.add_field(name=f'{row[1]}', value=f'[{row[0]}]({row[2]})', inline=False)
 
             print(f'알림 설정한 서버들을 대상으로 새 장학공지 알림을 전송합니다.')
             for channel_id in channels:
@@ -278,6 +303,21 @@ async def notice_crawling():
                     await channel.send(embed=embed)
                 except Exception:
                     continue
+
+        if len(new_dormitory_notice) > 0:
+            embed = discord.Embed(title="새 생활관공지", color=0x007EE9)
+            channels_domi = server_bot_settings.get_channel_dormitory()
+            for row in new_dormitory_notice:
+                embed.add_field(name=f'{row[1]}', value=f'[{row[0]}]({row[2]})', inline=False)
+
+            print(f'알림 설정한 서버들을 대상으로 새 생활관공지 알림을 전송합니다.')
+            for channel_id in channels_domi:
+                try:
+                    channel = bot.get_channel(channel_id[0])
+                    await channel.send(embed=embed)
+                except Exception:
+                    continue
+
 
     global status
     status = cycle(['명령어: /도움', f'{BOT_VERSION}', f'{len(bot.guilds)}개의 서버와 함께'])
