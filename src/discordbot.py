@@ -180,6 +180,8 @@ async def 도움(ctx):
     embed.add_field(name='`/알림설정 (0, 9 ~ 12)`', value='해당 명령어를 입력한 채널이 학교 공지사항, 봇 공지사항과 학식 알림을 받을 채널이 됩니다.\n'
                                                       '9 ~ 12 사이의 정수를 입력하여 학식 알림을 받을 시간대를 설정할 수 있으며, '
                                                       '0을 입력하거나 정수를 입력하지 않을 경우 학식 알림을 보내지 않습니다.', inline=False)
+    embed.add_field(name='`/생활관공지`', value='생활관 공지사항 알림을 켭니다. 알림이 켜져있을 때 이 명령어를 사용하면 알림이 꺼집니다.'
+                                           '이 명령어를 사용하려면 `/알림설정 n` 명령어를 먼저 사용해야합니다.', inline=False)
     embed.add_field(name='`/날씨 (0 ~ 4)`', value='0 ~ 4시간 뒤의 날씨 예보를 출력합니다.\n숫자를 입력하지 않는 경우 현재 날씨 예보를 출력합니다.(`/날씨 0`과 동일)', inline=False)
     await ctx.send(embed=embed)
 
@@ -213,7 +215,7 @@ async def 알림설정_error(ctx, error):
 
 @bot.command()
 @has_permissions(administrator=True, manage_messages=True)
-async def 기숙사공지(ctx):
+async def 생활관공지(ctx):
     try:
         result = server_bot_settings.set_dormitory_notification(ctx.guild.id)
         if result[1] == 0:
@@ -226,8 +228,8 @@ async def 기숙사공지(ctx):
         await ctx.message.channel.send(':warning: `/알림설정` 명령어를 사용하지 않았습니다. `/알림설정` 명령어 입력 후 다시 시도해주세요.')
 
 
-@기숙사공지.error
-async def 기숙사공지_error(ctx, error):
+@생활관공지.error
+async def 생활관공지_error(ctx, error):
     if isinstance(error, MissingPermissions):
         await ctx.message.channel.send(':no_entry: 해당 명령어를 실행할 권한이 없습니다.')
 
