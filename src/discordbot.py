@@ -25,7 +25,7 @@ BOT_VERSION = 'v1.0-beta.4'
 food_notification_time = [datetime.time(hour=i, minute=0,
                                         tzinfo=datetime.timezone(datetime.timedelta(hours=9))) for i in range(9, 13)]
 notice_crawling_time = [datetime.time(hour=i, minute=30,
-                                      tzinfo=datetime.timezone(datetime.timedelta(hours=9))) for i in range(1, 24, CRAWLING_PERIOD)]
+                                      tzinfo=datetime.timezone(datetime.timedelta(hours=9))) for i in range(0, 24, CRAWLING_PERIOD)]
 food_crawling_time = [datetime.time(hour=i, minute=0,
                                     tzinfo=datetime.timezone(datetime.timedelta(hours=9))) for i in range(0, 24, CRAWLING_PERIOD)]
 
@@ -45,6 +45,7 @@ async def on_ready():
     global status
     status = cycle(['명령어: /도움', f'{BOT_VERSION}', f'{len(bot.guilds)}개의 서버와 함께'])
 
+    noticecrawler.get_notice('notice', 'University')
     noticecrawler.get_notice('matters', 'Affairs')
     noticecrawler.get_notice('janghak', 'Scholarship')
 
@@ -180,7 +181,7 @@ async def 도움(ctx):
     embed.add_field(name='`/알림설정 (0, 9 ~ 12)`', value='해당 명령어를 입력한 채널이 학교 공지사항, 봇 공지사항과 학식 알림을 받을 채널이 됩니다.\n'
                                                       '9 ~ 12 사이의 정수를 입력하여 학식 알림을 받을 시간대를 설정할 수 있으며, '
                                                       '0을 입력하거나 정수를 입력하지 않을 경우 학식 알림을 보내지 않습니다.', inline=False)
-    embed.add_field(name='`/생활관공지`', value='생활관 공지사항 알림을 켭니다. 알림이 켜져있을 때 이 명령어를 사용하면 알림이 꺼집니다.'
+    embed.add_field(name='`/생활관공지`', value='생활관 공지사항 알림을 켭니다. 알림이 켜져있을 때 이 명령어를 사용하면 알림이 꺼집니다. '
                                            '이 명령어를 사용하려면 `/알림설정 n` 명령어를 먼저 사용해야합니다.', inline=False)
     embed.add_field(name='`/날씨 (0 ~ 4)`', value='0 ~ 4시간 뒤의 날씨 예보를 출력합니다.\n숫자를 입력하지 않는 경우 현재 날씨 예보를 출력합니다.(`/날씨 0`과 동일)', inline=False)
     await ctx.send(embed=embed)
