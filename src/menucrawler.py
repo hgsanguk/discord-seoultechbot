@@ -64,6 +64,12 @@ def student_cafeteria_2():
                         'WHERE year_month_date=?',
                         (menu1[0], menu1[1], menu1[2], menu2[0], menu2[1], menu2[2], dinner_menu[0], dinner_menu[1], dinner_menu[2], int(datetime.date.today().strftime('%y%m%d'))))
             print('제2학생회관 크롤링 성공!')
+
+        cur.execute('SELECT count(year_month_date) FROM Student_Cafeteria_2')
+        count = cur.fetchall()[0][0]
+        while count > 3:
+            cur.execute('DELETE FROM Student_Cafeteria_2 WHERE year_month_date = (SELECT min(year_month_date) FROM Student_Cafeteria_2)')
+            count -= 1
     except NoSuchElementException:
         print('크롤링 실패. 다음 주기에 다시 시도합니다. (오늘의 식단표 없음)')
         driver.close()
@@ -90,6 +96,11 @@ def technopark():
             print('서울테크노파크 식단 크롤링 성공!')
         except sqlite3.IntegrityError:
             print('크롤링 실패. 다음 주기에 다시 시도합니다. (지난주 게시글 크롤링 시도)')
+        cur.execute('SELECT count(year_week) FROM TechnoPark')
+        count = cur.fetchall()[0][0]
+        while count > 3:
+            cur.execute('DELETE FROM TechnoPark WHERE year_week = (SELECT min(year_week) FROM TechnoPark)')
+            count -= 1
     except NoSuchElementException:
         print('크롤링 실패. 다음 주기에 다시 시도합니다. (페이지의 레이아웃 변경됨)')
         driver.close()
@@ -105,5 +116,4 @@ def get_sc2_menu(date):
 def get_technopark_menu(week):
     cur.execute('SELECT title, img_link FROM TechnoPark WHERE year_week=?', (week,))
     return cur.fetchall()[0]
-
 

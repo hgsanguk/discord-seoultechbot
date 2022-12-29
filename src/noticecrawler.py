@@ -31,6 +31,11 @@ def get_notice(board_name, table_name):
                 continue
         except IndexError:
             continue
+    cur.execute('SELECT count(board_index) FROM ' + table_name)
+    count = cur.fetchall()[0][0]
+    while count > 22:
+        cur.execute('DELETE FROM ' + table_name + ' WHERE board_index = (SELECT min(board_index) FROM ' + table_name + ')')
+        count -= 1
     return new_notice
 
 
@@ -54,4 +59,9 @@ def get_domi_notice():
             new_notice.append([title, author, 'https://domi.seoultech.ac.kr/do/notice/' + url])
         except sqlite3.IntegrityError:
             continue
+    cur.execute('SELECT count(board_index) FROM Dormitory')
+    count = cur.fetchall()[0][0]
+    while count > 17:
+        cur.execute('DELETE FROM Domitory WHERE board_index = (SELECT min(board_index) FROM Dormitory)')
+        count -= 1
     return new_notice
