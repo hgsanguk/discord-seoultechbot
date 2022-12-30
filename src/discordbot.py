@@ -169,12 +169,12 @@ async def 날씨(interaction):
 async def 도움(interaction):
     embed = discord.Embed(title="봇 명령어 목록", color=0x711E92)
     embed.add_field(name=':warning:주의사항:warning:', value='**봇 입장 후 `/알림설정` 명령어를 사용해야 학교 공지사항과 학식 알림을 받을 수 있습니다.**\n'
-                                                         '학교 공지사항은 학교 홈페이지의 **대학공지사항, 학사공지, 장학공지**를 알려드립니다. '
+                                                         '학교 공지사항은 학교 홈페이지의 **대학공지사항, 학사공지, 장학공지, 생활관공지(선택)**를 알려드립니다. '
                                                          '이외의 공지사항은 학교 홈페이지를 참고하시기 바랍니다.\n', inline=False)
     embed.add_field(name='`/2학`', value='제2학생회관의 오늘 식단표를 보여줍니다.', inline=False)
     embed.add_field(name='`/테파`', value='테크노파크의 이번 주 식단표를 보여줍니다.', inline=False)
     embed.add_field(name='`/날씨`', value='현재 캠퍼스의 날씨와 1 ~ 6시간 뒤 날씨 예보를 보여줍니다.', inline=False)
-    embed.add_field(name='`/알림설정`', value='알림을 설정하는 명령어입니다. 해당 명령어를 입력한 채널이 각종 알림을 받을 채널이 됩니다.', inline=False)
+    embed.add_field(name='`/알림설정 [학식알림] [생활관공지알림]`', value='알림을 설정하는 명령어입니다. 해당 명령어를 입력한 채널이 각종 알림을 받을 채널이 됩니다.', inline=False)
     await interaction.response.send_message(embed=embed)
 
 
