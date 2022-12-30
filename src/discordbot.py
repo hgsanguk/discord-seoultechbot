@@ -156,7 +156,7 @@ async def 날씨(interaction):
             elif data[i][3] == '7':
                 result_str += time_str + ':snowflake:' + temp_str
             else:
-                result_str += time_str + data[0][1] + temp_str
+                result_str += time_str + data[i][1] + temp_str
 
         embed.add_field(name='날씨 예보', value=result_str, inline=False)
         embed.set_footer(text='기상청 초단기예보 조회 서비스 오픈 API를 이용한 것으로, 실제 기상상황과 차이가 있을 수 있습니다.')
@@ -174,13 +174,13 @@ async def 도움(interaction):
     embed.add_field(name='`/2학`', value='제2학생회관의 오늘 식단표를 보여줍니다.', inline=False)
     embed.add_field(name='`/테파`', value='테크노파크의 이번 주 식단표를 보여줍니다.', inline=False)
     embed.add_field(name='`/날씨`', value='현재 캠퍼스의 날씨와 1 ~ 6시간 뒤 날씨 예보를 보여줍니다.', inline=False)
-    embed.add_field(name='`/알림설정 [학식알림] [생활관공지알림]`', value='알림을 설정하는 명령어입니다. 해당 명령어를 입력한 채널이 각종 알림을 받을 채널이 됩니다.', inline=False)
+    embed.add_field(name='`/알림설정 [학식알림] [생활관공지알림]`', value='알림을 설정하는 명령어입니다. 해당 명령어를 입력한 채널이 각종 알림을 받을 채널이 됩니다. (해당 명령어의 사용자는 관리자 권한이 있어야 합니다.)', inline=False)
     await interaction.response.send_message(embed=embed)
 
 
 # 여기서부터 봇 설정 관련 명령어입니다.
 
-@tree.command(description='알림을 설정하는 명령어입니다. 해당 명령어를 입력한 채널이 각종 알림을 받을 채널이 됩니다.')
+@tree.command(description='(관리자) 알림을 설정하는 명령어입니다. 해당 명령어를 입력한 채널이 각종 알림을 받을 채널이 됩니다.')
 @app_commands.choices(학식알림=[app_commands.Choice(name='받지 않음', value=0), app_commands.Choice(name='9시', value=9),
                                    app_commands.Choice(name='10시', value=10), app_commands.Choice(name='11시', value=11),
                                    app_commands.Choice(name='12시', value=12)])
