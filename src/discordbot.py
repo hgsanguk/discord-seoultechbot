@@ -1,14 +1,16 @@
+# Built-in & discord.py Library
 import datetime
 import os
 from itertools import cycle
 import discord
+from discord import app_commands
+from discord.ext import tasks
 
+# TechBot Library
 import server_bot_settings
 import menucrawler
 import noticecrawler
 import weather
-from discord.ext import commands, tasks
-from discord.ext.commands import has_permissions, MissingPermissions
 
 token_path = os.path.dirname(os.path.abspath(__file__)) + "/token"
 token_file = open(token_path, "r", encoding="utf-8").read().split()
@@ -18,10 +20,11 @@ weather_api_token = token_file[1]
 print("Discord Bot Token: ", discord_bot_token)
 print("오픈 API 기상청 단기예보 조회서비스 Token: ", weather_api_token)
 
-bot = commands.Bot(command_prefix='/', intents=discord.Intents.all())
+bot = discord.Client(intents=discord.Intents.all())
+tree = app_commands.CommandTree(bot)
 global status
 CRAWLING_PERIOD = 2
-BOT_VERSION = 'v1.0-beta.4'
+BOT_VERSION = 'v1.0'
 food_notification_time = [datetime.time(hour=i, minute=0,
                                         tzinfo=datetime.timezone(datetime.timedelta(hours=9))) for i in range(9, 13)]
 notice_crawling_time = [datetime.time(hour=i, minute=30,
@@ -48,192 +51,171 @@ async def on_ready():
     noticecrawler.get_notice('notice', 'University')
     noticecrawler.get_notice('matters', 'Affairs')
     noticecrawler.get_notice('janghak', 'Scholarship')
+    noticecrawler.get_domi_notice()
 
     await food_crawling()
     await bot.change_presence(status=discord.Status.online)
+    await tree.sync()
     print('봇 실행 완료.')
 
 
-@bot.command(name="2학")
-async def _2학(ctx):
+@bot.event
+async def on_guild_join(guild):
+    for channel in guild.text_channels:
+        if channel.permissions_for(guild.me).send_messages:
+            await channel.send(':wave: 안녕하세요! 서울과학기술대학교 비공식 디스코드 봇, 테크봇을 이용해주셔서 감사합니다.\n'
+                               '`/도움` 명령어로 명령어의 목록을 확인하실 수 있습니다.')
+            break
+
+
+# 여기서부터 봇 명령어 코드입니다.
+
+@tree.command(name='2학', description='제2학생회관의 오늘 식단표를 보여줍니다.')
+async def _2학(interaction):
     try:
         today = datetime.datetime.now()
         day_str = '{today.month}월 {today.day}일 식단표'.format(today=today)
         food_data = menucrawler.get_sc2_menu(int(today.strftime('%y%m%d')))
         embed = discord.Embed(title="제2학생회관", description=day_str, color=0x73BF1F)
-        embed.add_field(name=f"{food_data[0]} `{food_data[1]}`", value=f"{food_data[2]}", inline=False)
-        embed.add_field(name=f"{food_data[3]} `{food_data[4]}`", value=f"{food_data[5]}", inline=False)
-        embed.add_field(name=f"{food_data[6]}(저녁) `{food_data[7]}`", value=f"{food_data[8]}", inline=False)
-        await ctx.send(embed=embed)
+        embed.add_field(name=f"점심: {food_data[0]} `{food_data[1]}`", value=f"{food_data[0]}", inline=False)
+        if food_data[3] != '간단 snack':
+            embed.add_field(name=f"점심: {food_data[3]} `{food_data[4]}`", value=f"{food_data[5]}", inline=False)
+        embed.add_field(name=f"저녁: {food_data[6]} `{food_data[7]}`", value=f"{food_data[8]}", inline=False)
+        await interaction.response.send_message(embed=embed)
     except IndexError:
         embed = discord.Embed(title="제2학생회관", description='오늘 등록된 식단표가 없습니다.', color=0x73BF1F)
-        await ctx.send(embed=embed)
+        await interaction.response.send_message(embed=embed)
 
 
-@bot.command()
-async def 테파(ctx):
+@tree.command(description='테크노파크의 이번 주 식단표를 보여줍니다.')
+async def 테파(interaction):
     try:
         today = datetime.datetime.now()
         food_data = menucrawler.get_technopark_menu(int(today.strftime('%y%W')))
         embed = discord.Embed(title="테크노파크", description=f"{food_data[0]}", color=0x0950A1)
         embed.set_image(url=f"{food_data[1]}")
-        await ctx.send(embed=embed)
+        await interaction.response.send_message(embed=embed)
     except IndexError:
         embed = discord.Embed(title="테크노파크", description='이번 주에 등록된 식단표가 없습니다.', color=0x0950A1)
-        await ctx.send(embed=embed)
+        await interaction.response.send_message(embed=embed)
 
 
-@bot.command()
-async def 날씨(ctx, args='0'):
+@tree.command(description='현재 캠퍼스의 날씨와 1 ~ 6시간 뒤 날씨 예보를 보여줍니다.')
+async def 날씨(interaction):
     try:
-        args = int(args)
-        if 0 <= args < 5:
-            try:
-                data = weather.get_weather(weather_api_token, args)
+        date = weather.get_weather(weather_api_token)[0]
+        data = weather.get_weather(weather_api_token)[1]
 
-                if 8 <= data[0].hour <= 16:
-                    color = 0x99CCFF
-                elif 5 <= data[0].hour < 8:
-                    color = 0xFAEBD7
-                elif 16 < data[0].hour < 19:
-                    color = 0xF29886
-                else:
-                    color = 0x000080
-
-                embed = discord.Embed(title="오늘의 캠퍼스 날씨",
-                                      description='{day.month}월 {day.day}일 {day.hour}시 {day.minute}분 공릉동의 날씨입니다.'
-                                      .format(day=data[0]), color=color)
-
-                if data[2][3] == '1':
-                    embed.add_field(name=':umbrella: 비\n'
-                                         ':cloud_snow: 강수량 :' + data[2][4] + '\n'
-                                         ':thermometer: 기온: ' + data[2][0] + '°C',
-                                    value=':droplet: 습도: ' + data[2][5] + '%\n'
-                                          ':dash: 바람: ' + data[2][7] + '(' + data[2][6] + '°) 방향으로 ' + data[2][8] + 'm/s',
-                                    inline=False)
-                elif data[2][3] == '2':
-                    embed.add_field(name=':umbrella: 눈비\n'
-                                         ':cloud_snow: 강수량 :' + data[2][4] + '\n'
-                                         ':thermometer: 기온: ' + data[2][0] + '°C',
-                                    value=':droplet: 습도: ' + data[2][5] + '%\n'
-                                          ':dash: 바람: ' + data[2][7] + '(' + data[2][6] + '°) 방향으로 ' + data[2][8] + 'm/s',
-                                    inline=False)
-                elif data[2][3] == '3':
-                    embed.add_field(name=':snowman2: 눈\n'
-                                         ':cloud_snow: 강수량 :' + data[2][4] + '\n'
-                                         ':thermometer: 기온: ' + data[2][0] + '°C',
-                                    value=':droplet: 습도: ' + data[2][5] + '%\n'
-                                          ':dash: 바람: ' + data[2][7] + '(' + data[2][6] + '°) 방향으로 ' + data[2][8] + 'm/s',
-                                    inline=False)
-                elif data[2][3] == '4':
-                    embed.add_field(name=':white_sun_rain_cloud: 소나기\n'
-                                         ':cloud_snow: 강수량 :' + data[2][4] + '\n'
-                                         ':thermometer: 기온: ' + data[2][0] + '°C',
-                                    value=':droplet: 습도: ' + data[2][5] + '%\n'
-                                          ':dash: 바람: ' + data[2][7] + '(' + data[2][6] + '°) 방향으로 ' + data[2][8] + 'm/s',
-                                    inline=False)
-                elif data[2][3] == '5':
-                    embed.add_field(name=':sweat_drops: 빗방울\n'
-                                         ':cloud_snow: 강수량 :' + data[2][4] + '\n'
-                                         ':thermometer: 기온: ' + data[2][0] + '°C',
-                                    value=':droplet: 습도: ' + data[2][5] + '%\n'
-                                          ':dash: 바람: ' + data[2][7] + '(' + data[2][6] + '°) 방향으로 ' + data[2][8] + 'm/s',
-                                    inline=False)
-                elif data[2][3] == '6':
-                    embed.add_field(name=':umbrella: 싸락눈/빗방울\n'
-                                         ':cloud_snow: 강수량 :' + data[2][4] + '\n'
-                                         ':thermometer: 기온: ' + data[2][0] + '°C',
-                                    value=':droplet: 습도: ' + data[2][5] + '%\n'
-                                          ':dash: 바람: ' + data[2][7] + '(' + data[2][6] + '°) 방향으로 ' + data[2][8] + 'm/s',
-                                    inline=False)
-                elif data[2][3] == '7':
-                    embed.add_field(name=':snowflake: 싸락눈\n'
-                                         ':cloud_snow: 강수량 :' + data[2][4] + '\n'
-                                         ':thermometer: 기온: ' + data[2][0] + '°C',
-                                    value=':droplet: 습도: ' + data[2][5] + '%\n'
-                                          ':dash: 바람: ' + data[2][7] + '(' + data[2][6] + '°) 방향으로 ' + data[2][8] + 'm/s',
-                                    inline=False)
-                else:
-                    embed.add_field(name=data[2][2] + '\n:thermometer: 기온: ' + data[2][0] + '°C',
-                                    value=':droplet: 습도: ' + data[2][5] + '%\n:dash: 바람: ' + data[2][7] + '(' + data[2][6]
-                                          + '°) 방향으로 ' + data[2][8] + 'm/s', inline=False)
-
-                embed.set_footer(text='기상청 초단기예보 조회 서비스 오픈 API를 이용한 것으로, 실제 기상상황과 차이가 있을 수 있습니다.')
-                await ctx.send(embed=embed)
-            except ValueError:
-                await ctx.send('날씨 정보를 불러오는 중 오류가 발생했습니다.')
+        if 8 <= date.hour <= 16:
+            color = 0x99CCFF
+        elif 5 <= date.hour < 8:
+            color = 0xFAEBD7
+        elif 16 < date.hour < 19:
+            color = 0xF29886
         else:
-            raise ValueError
+            color = 0x000080
+
+        embed = discord.Embed(title="오늘의 캠퍼스 날씨",
+                              description='{day.month}월 {day.day}일 {day.hour}시 {day.minute}분 공릉동의 날씨입니다.'
+                              .format(day=date), color=color)
+        string_1 = ':droplet: 습도: ' + data[0][5] + '%\n:dash: 바람: ' + data[0][7] + '(' + data[0][6] + '°) 방향으로 ' + data[0][8] + 'm/s'
+        string_2 = ':cloud_snow: 강수량 :' + data[0][4] + '\n:thermometer: 기온: ' + data[0][0] + '°C'
+        if data[0][3] == '1':
+            embed.add_field(name=':umbrella: 비\n' + string_2, value=string_1, inline=False)
+        elif data[0][3] == '2':
+            embed.add_field(name=':umbrella: 눈비\n' + string_2, value=string_1, inline=False)
+        elif data[0][3] == '3':
+            embed.add_field(name=':snowman2: 눈\n' + string_2, value=string_1, inline=False)
+        elif data[0][3] == '4':
+            embed.add_field(name=':white_sun_rain_cloud: 소나기\n' + string_2, value=string_1, inline=False)
+        elif data[0][3] == '5':
+            embed.add_field(name=':sweat_drops: 빗방울\n' + string_2, value=string_1, inline=False)
+        elif data[0][3] == '6':
+            embed.add_field(name=':umbrella: 싸락눈/빗방울\n' + string_2, value=string_1, inline=False)
+        elif data[0][3] == '7':
+            embed.add_field(name=':snowflake: 싸락눈\n' + string_2, value=string_1, inline=False)
+        else:
+            embed.add_field(name=data[0][1] + ' ' + data[0][2] + '\n:thermometer: 기온: ' + data[0][0] + '°C', value=string_1, inline=False)
+
+        result_str = ''
+        for i in range(1, 6):
+            time_str = '**' + data[i][9] + '시**: '
+            temp_str = ' ' + data[i][0] + '°C, :droplet: ' + data[i][5] + '%\n'
+            if data[i][3] == '1':
+                result_str += time_str + ':umbrella:' + temp_str
+            elif data[i][3] == '2':
+                result_str += time_str + ':umbrella:/:snowman2:' + temp_str
+            elif data[i][3] == '3':
+                result_str += time_str + ':snowman2:' + temp_str
+            elif data[i][3] == '4':
+                result_str += time_str + ':white_sun_rain_cloud:' + temp_str
+            elif data[i][3] == '5':
+                result_str += time_str + ':sweat_drops:' + temp_str
+            elif data[i][3] == '6':
+                result_str += time_str + ':snowflake:/:umbrella:' + temp_str
+            elif data[i][3] == '7':
+                result_str += time_str + ':snowflake:' + temp_str
+            else:
+                result_str += time_str + data[0][1] + temp_str
+
+        embed.add_field(name='날씨 예보', value=result_str, inline=False)
+        embed.set_footer(text='기상청 초단기예보 조회 서비스 오픈 API를 이용한 것으로, 실제 기상상황과 차이가 있을 수 있습니다.')
+        await interaction.response.send_message(embed=embed)
     except ValueError:
-        await ctx.send(':no_entry_sign: 올바르지 않은 입력입니다. 0 이상 4 이하의 정수를 입력하세요.')
-    except Exception:
-        await ctx.send('날씨 정보를 불러오는 중 오류가 발생했습니다.')
+        await interaction.response.send_message('날씨 정보를 불러오는 중 오류가 발생했습니다.')
 
 
-@bot.command()
-async def 도움(ctx):
+@tree.command(description='테크봇의 명령어 목록과 설명을 보여줍니다.')
+async def 도움(interaction):
     embed = discord.Embed(title="봇 명령어 목록", color=0x711E92)
-    embed.add_field(name=':warning:주의사항:warning:', value='**봇 입장 후 `/알림설정` 명령어를 사용해야 봇 & 학교 공지사항을 받을 수 있습니다.**\n'
+    embed.add_field(name=':warning:주의사항:warning:', value='**봇 입장 후 `/알림설정` 명령어를 사용해야 학교 공지사항과 학식 알림을 받을 수 있습니다.**\n'
                                                          '학교 공지사항은 학교 홈페이지의 **대학공지사항, 학사공지, 장학공지**를 알려드립니다. '
                                                          '이외의 공지사항은 학교 홈페이지를 참고하시기 바랍니다.\n', inline=False)
-    embed.add_field(name='`/2학`', value='제2학생회관의 오늘 식단표를 출력합니다.', inline=False)
-    embed.add_field(name='`/테파`', value='테크노파크의 이번 주 식단표를 출력합니다.', inline=False)
-    embed.add_field(name='`/알림설정 (0, 9 ~ 12)`', value='해당 명령어를 입력한 채널이 학교 공지사항, 봇 공지사항과 학식 알림을 받을 채널이 됩니다.\n'
-                                                      '9 ~ 12 사이의 정수를 입력하여 학식 알림을 받을 시간대를 설정할 수 있으며, '
-                                                      '0을 입력하거나 정수를 입력하지 않을 경우 학식 알림을 보내지 않습니다.', inline=False)
-    embed.add_field(name='`/생활관공지`', value='생활관 공지사항 알림을 켭니다. 알림이 켜져있을 때 이 명령어를 사용하면 알림이 꺼집니다. '
-                                           '이 명령어를 사용하려면 `/알림설정 n` 명령어를 먼저 사용해야합니다.', inline=False)
-    embed.add_field(name='`/날씨 (0 ~ 4)`', value='0 ~ 4시간 뒤의 날씨 예보를 출력합니다.\n숫자를 입력하지 않는 경우 현재 날씨 예보를 출력합니다.(`/날씨 0`과 동일)', inline=False)
-    await ctx.send(embed=embed)
+    embed.add_field(name='`/2학`', value='제2학생회관의 오늘 식단표를 보여줍니다.', inline=False)
+    embed.add_field(name='`/테파`', value='테크노파크의 이번 주 식단표를 보여줍니다.', inline=False)
+    embed.add_field(name='`/날씨`', value='현재 캠퍼스의 날씨와 1 ~ 6시간 뒤 날씨 예보를 보여줍니다.', inline=False)
+    embed.add_field(name='`/알림설정`', value='알림을 설정하는 명령어입니다. 해당 명령어를 입력한 채널이 각종 알림을 받을 채널이 됩니다.', inline=False)
+    await interaction.response.send_message(embed=embed)
 
 
 # 여기서부터 봇 설정 관련 명령어입니다.
 
-@bot.command()
-@has_permissions(administrator=True, manage_messages=True)
-async def 알림설정(ctx, arg='0'):
-    try:
-        arg = int(arg)
-        if arg == 0:
-            server_bot_settings.set_notification_channel(ctx.guild.id, ctx.channel.id, arg)
-            print(f'{ctx.guild.name}({ctx.guild.id}) 서버의 {ctx.channel.name}({ctx.channel.id}) 채널에서 알림 받을 채널 설정. 학식 알림 받지 않음.')
-            await ctx.send(':white_check_mark: 이제부터 이 채널에서 봇 공지사항과 학교 공지사항을 알려드립니다.')
-        elif 9 <= arg <= 12:
-            server_bot_settings.set_notification_channel(ctx.guild.id, ctx.channel.id, arg)
-            print(f'{ctx.guild.name}({ctx.guild.id}) 서버의 {ctx.channel.name}({ctx.channel.id}) 채널에서 알림 받을 채널 설정. 학식 알림 시간: {arg}시')
-            await ctx.send(f':white_check_mark: 이제부터 이 채널에서 봇 공지사항과 학교 공지사항, 그리고 매일 {arg}시에 학식 메뉴를 알려드립니다.')
+@tree.command(description='알림을 설정하는 명령어입니다. 해당 명령어를 입력한 채널이 각종 알림을 받을 채널이 됩니다.')
+@app_commands.choices(학식알림=[app_commands.Choice(name='받지 않음', value=0), app_commands.Choice(name='9시', value=9),
+                                   app_commands.Choice(name='10시', value=10), app_commands.Choice(name='11시', value=11),
+                                   app_commands.Choice(name='12시', value=12)])
+@app_commands.describe(학식알림="선택한 시간대(9시 ~ 12시)에 학식 메뉴 알림을 받습니다. 학식 메뉴 알림이 필요없다면 '받지 않음'을 선택해주세요.")
+@app_commands.choices(생활관공지알림=[app_commands.Choice(name='받지 않음', value=0), app_commands.Choice(name='받음', value=1)])
+@app_commands.describe(생활관공지알림='생활관 공지 알림을 받을지 선택하는 옵션입니다.')
+async def 알림설정(interaction, 학식알림: app_commands.Choice[int], 생활관공지알림: app_commands.Choice[int]):
+    if not interaction.user.guild_permissions.administrator:
+        await interaction.response.send_message(':no_entry: 해당 명령어를 실행할 권한이 없습니다.', ephemeral=True)
+    else:
+        arg1 = 학식알림.value
+        arg2 = 생활관공지알림.value
+        server_bot_settings.set_notification_channel(interaction.guild.id, interaction.channel.id, arg1)
+        server_bot_settings.set_dormitory_notification(interaction.guild.id, arg2)
+
+        embed = discord.Embed(title=f':white_check_mark: {interaction.guild.name}의 알림 설정 결과',
+                              description=f'알림 받을 채널 이름: `{interaction.channel.name}`', color=0x711E92)
+
+        if arg1 == 0:
+            print(f'{interaction.guild.name}({interaction.guild.id}) 서버의 {interaction.channel.name}({interaction.channel.id}) 채널에서 알림 받을 채널 설정. 학식 알림 받지 않음.')
+            embed.add_field(name='학식 알림', value='`받지 않음`')
+        elif 9 <= arg1 <= 12:
+            print(f'{interaction.guild.name}({interaction.guild.id}) 서버의 {interaction.channel.name}({interaction.channel.id}) 채널에서 알림 받을 채널 설정. 학식 알림 시간: {arg1}시')
+            embed.add_field(name='학식 알림', value=f'`{arg1}시 정각에 받음`')
+
+        if arg2 == 1:
+            print(f'{interaction.guild.name}({interaction.guild.id}) 서버의 {interaction.channel.name}({interaction.channel.id}) 채널에서 기숙사 알림 켬')
+            embed.add_field(name='생활관 공지 알림', value='`받음`')
         else:
-            raise ValueError
-    except ValueError:
-        await ctx.send(':no_entry_sign: 올바르지 않은 입력입니다. 9 이상 12 이하의 정수를 입력하세요.')
+            print(f'{interaction.guild.name}({interaction.guild.id}) 서버의 {interaction.channel.name}({interaction.channel.id}) 채널에서 기숙사 알림 끔')
+            embed.add_field(name='생활관 공지 알림', value='`받지 않음`')
+        await interaction.response.send_message(embed=embed)
 
 
-@알림설정.error
-async def 알림설정_error(ctx, error):
-    if isinstance(error, MissingPermissions):
-        await ctx.message.channel.send(':no_entry: 해당 명령어를 실행할 권한이 없습니다.')
-
-
-@bot.command()
-@has_permissions(administrator=True, manage_messages=True)
-async def 생활관공지(ctx):
-    try:
-        result = server_bot_settings.set_dormitory_notification(ctx.guild.id)
-        if result[1] == 0:
-            print(f'{ctx.guild.name}({ctx.guild.id}) 서버의 {bot.get_channel(result[0]).name}({result[0]}) 채널에서 기숙사 알림 켬')
-            await ctx.message.channel.send(':bell: 기숙사 알림을 켰습니다.')
-        else:
-            print(f'{ctx.guild.name}({ctx.guild.id}) 서버의 {bot.get_channel(result[0]).name}({result[0]}) 채널에서 기숙사 알림 끔')
-            await ctx.message.channel.send(':no_bell: 기숙사 알림을 껐습니다.')
-    except IndexError:
-        await ctx.message.channel.send(':warning: `/알림설정` 명령어를 사용하지 않았습니다. `/알림설정` 명령어 입력 후 다시 시도해주세요.')
-
-
-@생활관공지.error
-async def 생활관공지_error(ctx, error):
-    if isinstance(error, MissingPermissions):
-        await ctx.message.channel.send(':no_entry: 해당 명령어를 실행할 권한이 없습니다.')
-
+# 여기서부터 봇의 자동화 관련 코드입니다.
 
 @tasks.loop(time=food_crawling_time)
 async def food_crawling():
@@ -253,7 +235,6 @@ async def food_crawling():
 
 @tasks.loop(time=notice_crawling_time)
 async def notice_crawling():
-    channels = server_bot_settings.get_channel_all()
     print(f'{datetime.datetime.now()}에 공지사항 크롤링 시도...')
     try:
         new_univ_notice = noticecrawler.get_notice('notice', 'University')
@@ -267,60 +248,45 @@ async def notice_crawling():
         new_dormitory_notice = []
         print('학교 홈페이지 연결 실패. 다음 주기에 다시 시도합니다.')
 
-    if len(channels) > 0:
-        if len(new_univ_notice) > 0:
-            embed = discord.Embed(title="새 대학공지사항", color=0xA4343A)
-            for row in new_univ_notice:
-                embed.add_field(name=f'{row[1]}', value=f'[{row[0]}]({row[2]})', inline=False)
+    univ_notice_embed = discord.Embed(title="새 대학공지사항", color=0xA4343A)
+    scholarship_embed = discord.Embed(title="새 장학공지", color=0x333F48)
+    affairs_embed = discord.Embed(title="새 학사공지", color=0x00205B)
 
-            print(f'알림 설정한 서버들을 대상으로 새 대학공지사항 알림을 전송합니다.')
-            for channel_id in channels:
-                try:
-                    channel = bot.get_channel(channel_id[0])
-                    await channel.send(embed=embed)
-                except Exception:
-                    continue
+    for row in new_univ_notice:
+        univ_notice_embed.add_field(name=f'{row[1]}', value=f'[{row[0]}]({row[2]})', inline=False)
+    for row in new_affairs_notice:
+        affairs_embed.add_field(name=f'{row[1]}', value=f'[{row[0]}]({row[2]})', inline=False)
+    for row in new_scholarship_notice:
+        scholarship_embed.add_field(name=f'{row[1]}', value=f'[{row[0]}]({row[2]})', inline=False)
 
-        if len(new_affairs_notice) > 0:
-            embed = discord.Embed(title="새 학사공지", color=0x00205B)
-            for row in new_affairs_notice:
-                embed.add_field(name=f'{row[1]}', value=f'[{row[0]}]({row[2]})', inline=False)
+    channels = server_bot_settings.get_channel_all()
+    if len(new_univ_notice) > 0 or len(new_affairs_notice) > 0 or len(new_scholarship_notice) > 0:
+        print(f'알림 설정한 서버들을 대상으로 새 공지사항 알림을 전송합니다.')
+        for channel_id in channels:
+            try:
+                channel = bot.get_channel(channel_id[0])
+                if len(new_univ_notice) > 0:
+                    await channel.send(embed=univ_notice_embed)
+                if len(new_affairs_notice) > 0:
+                    await channel.send(embed=affairs_embed)
+                if len(new_scholarship_notice) > 0:
+                    await channel.send(embed=scholarship_embed)
+            except Exception:
+                continue
 
-            print(f'알림 설정한 서버들을 대상으로 새 학사공지 알림을 전송합니다.')
-            for channel_id in channels:
-                try:
-                    channel = bot.get_channel(channel_id[0])
-                    await channel.send(embed=embed)
-                except Exception:
-                    continue
+    if len(new_dormitory_notice) > 0:
+        embed = discord.Embed(title="새 생활관공지", color=0x007EE9)
+        channels_domi = server_bot_settings.get_channel_dormitory()
+        for row in new_dormitory_notice:
+            embed.add_field(name=f'{row[1]}', value=f'[{row[0]}]({row[2]})', inline=False)
 
-        if len(new_scholarship_notice) > 0:
-            embed = discord.Embed(title="새 장학공지", color=0x333F48)
-            for row in new_scholarship_notice:
-                embed.add_field(name=f'{row[1]}', value=f'[{row[0]}]({row[2]})', inline=False)
-
-            print(f'알림 설정한 서버들을 대상으로 새 장학공지 알림을 전송합니다.')
-            for channel_id in channels:
-                try:
-                    channel = bot.get_channel(channel_id[0])
-                    await channel.send(embed=embed)
-                except Exception:
-                    continue
-
-        if len(new_dormitory_notice) > 0:
-            embed = discord.Embed(title="새 생활관공지", color=0x007EE9)
-            channels_domi = server_bot_settings.get_channel_dormitory()
-            for row in new_dormitory_notice:
-                embed.add_field(name=f'{row[1]}', value=f'[{row[0]}]({row[2]})', inline=False)
-
-            print(f'알림 설정한 서버들을 대상으로 새 생활관공지 알림을 전송합니다.')
-            for channel_id in channels_domi:
-                try:
-                    channel = bot.get_channel(channel_id[0])
-                    await channel.send(embed=embed)
-                except Exception:
-                    continue
-
+        print(f'알림 설정한 서버들을 대상으로 새 생활관공지 알림을 전송합니다.')
+        for channel_id in channels_domi:
+            try:
+                channel = bot.get_channel(channel_id[0])
+                await channel.send(embed=embed)
+            except Exception:
+                continue
 
     global status
     status = cycle(['명령어: /도움', f'{BOT_VERSION}', f'{len(bot.guilds)}개의 서버와 함께'])
@@ -336,8 +302,30 @@ async def food_notification():
             for channel_id in channels:
                 try:
                     channel = bot.get_channel(channel_id[0])
-                    await 테파(channel)
-                    await _2학(channel)
+                    try:
+                        day_str = '{today.month}월 {today.day}일 식단표'.format(today=now)
+                        food_data = menucrawler.get_sc2_menu(int(now.strftime('%y%m%d')))
+                        embed = discord.Embed(title="제2학생회관", description=day_str, color=0x73BF1F)
+                        embed.add_field(name=f"점심: {food_data[0]} `{food_data[1]}`", value=f"{food_data[0]}",
+                                        inline=False)
+                        if food_data[3] != '간단 snack':
+                            embed.add_field(name=f"점심: {food_data[3]} `{food_data[4]}`", value=f"{food_data[5]}",
+                                            inline=False)
+                        embed.add_field(name=f"저녁: {food_data[6]} `{food_data[7]}`", value=f"{food_data[8]}",
+                                        inline=False)
+                        await channel.send(embed=embed)
+                    except IndexError:
+                        embed = discord.Embed(title="제2학생회관", description='오늘 등록된 식단표가 없습니다.', color=0x73BF1F)
+                        await channel.send(embed=embed)
+
+                    try:
+                        food_data = menucrawler.get_technopark_menu(int(now.strftime('%y%W')))
+                        embed = discord.Embed(title="테크노파크", description=f"{food_data[0]}", color=0x0950A1)
+                        embed.set_image(url=f"{food_data[1]}")
+                        await channel.send(embed=embed)
+                    except IndexError:
+                        embed = discord.Embed(title="테크노파크", description='이번 주에 등록된 식단표가 없습니다.', color=0x0950A1)
+                        await channel.send(embed=embed)
                 except Exception:
                     continue
         else:
@@ -349,4 +337,4 @@ async def change_status():
     await bot.change_presence(activity=discord.Game(next(status)))
 
 
-bot.run(discord_bot_token)  # Insert Your Bot Token
+bot.run(discord_bot_token)

@@ -2,9 +2,9 @@ import requests
 from datetime import datetime, timedelta
 
 
-def get_weather(token, added_time):
+def get_weather(token):
     today = datetime.now()
-    req_time = today + timedelta(hours=added_time)
+    req_time = today
     url = 'http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getUltraSrtFcst'
     direction = ['북', '북북동', '북동', '동북동', '동', '동남동', '남동', '남남동', '남', '남남서', '남서',
                  '서남서', '서', '서북서', '북서', '북북서', '북']
@@ -21,53 +21,58 @@ def get_weather(token, added_time):
     response = requests.get(url, params=params)
     items = response.json().get('response').get('body').get('items')
 
-    data = ['0', '0', []]
-    weather_data = ['오류', '오류', '오류', '오류', '오류', '오류', '오류', '오류', '오류']
+    data = [[], [], [], [], [], []]
 
-    data[0] = today + timedelta(hours=added_time)
-    for item in items['item']:
-        if item['fcstTime'] == req_time.strftime('%H') + '00':
-            data[1] = item['fcstTime']
-
-            # 기온
-            if item['category'] == 'T1H':
-                weather_data[0] = item['fcstValue']
-
-            # 하늘 상태
-            if item['category'] == 'SKY':
-                weather_data[1] = item['fcstValue']
-
-                if weather_data[1] == '1':
-                    weather_data[2] = ':sunny: 맑음'
-                elif weather_data[1] == '3':
-                    weather_data[2] = ':white_sun_cloud: 구름많음'
-                elif weather_data[1] == '4':
-                    weather_data[2] = ':cloud: 흐림'
+    for i in range(0, 6):
+        data[i] = ['기온', '하늘 상태 번호', '하늘 상태', '강수 형태', '강수량', '습도', '풍각', '풍향', '풍속', '예보 시간']
+        for item in items['item']:
+            if item['fcstTime'] == req_time.strftime('%H') + '00':
+                if int(item['fcstTime'][0:2]) < 10:
+                    data[i][9] = item['fcstTime'][1]
                 else:
-                    weather_data[2] = 'API 에러'
+                    data[i][9] = item['fcstTime'][0:2]
 
-            # 강수 형태
-            if item['category'] == 'PTY':
-                weather_data[3] = item['fcstValue']
+                # 기온
+                if item['category'] == 'T1H':
+                    data[i][0] = item['fcstValue']
 
-            # 강수량
-            if item['category'] == 'RN1':
-                weather_data[4] = item['fcstValue']
+                # 하늘 상태
+                if item['category'] == 'SKY':
+                    if item['fcstValue'] == '1':
+                        data[i][1] = ':sunny:'
+                        data[i][2] = '맑음'
+                    elif item['fcstValue'] == '3':
+                        data[i][1] = ':white_sun_cloud:'
+                        data[i][2] = '구름많음'
+                    elif item['fcstValue'] == '4':
+                        data[i][1] = ':cloud:'
+                        data[i][2] = '흐림'
+                    else:
+                        data[i][1] = ':warning:'
+                        data[i][2] = 'API 에러'
 
-            # 습도
-            if item['category'] == 'REH':
-                weather_data[5] = item['fcstValue']
+                # 강수 형태
+                if item['category'] == 'PTY':
+                    data[i][3] = item['fcstValue']
+                # 강수량
+                if item['category'] == 'RN1':
+                    data[i][4] = item['fcstValue']
 
-            # 풍향
-            if item['category'] == 'VEC':
-                weather_data[6] = item['fcstValue']
-                direction_num = int((int(item['fcstValue']) + 22.5 * 0.5) / 22.5)
-                weather_data[7] = direction[direction_num]
+                # 습도
+                if item['category'] == 'REH':
+                    data[i][5] = item['fcstValue']
 
-            # 풍속
-            if item['category'] == 'WSD':
-                weather_data[8] = item['fcstValue']
+                # 풍향
+                if item['category'] == 'VEC':
+                    data[i][6] = item['fcstValue']
+                    direction_num = int((int(item['fcstValue']) + 22.5 * 0.5) / 22.5)
+                    data[i][7] = direction[direction_num]
 
-    data[2] = weather_data
-    return data
+                # 풍속
+                if item['category'] == 'WSD':
+                    data[i][8] = item['fcstValue']
+
+        req_time += timedelta(hours=1)
+
+    return today, data
 

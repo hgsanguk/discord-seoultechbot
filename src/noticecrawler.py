@@ -62,6 +62,6 @@ def get_domi_notice():
     cur.execute('SELECT count(board_index) FROM Dormitory')
     count = cur.fetchall()[0][0]
     while count > 17:
-        cur.execute('DELETE FROM Domitory WHERE board_index = (SELECT min(board_index) FROM Dormitory)')
+        cur.execute('DELETE FROM Dormitory WHERE board_index = (SELECT min(board_index) FROM Dormitory)')
         count -= 1
     return new_notice
