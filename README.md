@@ -1,6 +1,6 @@
 # TechBot Project - Discord Bot for SEOULTECH
 ## Introduction
-discord.py를 이용하여 서울과학기술대학교의 식당의 메뉴와 공지사항을 자동으로 알려주고, ~~각종~~ 편의기능을 제공하는 Discord 봇 프로젝트 입니다.
+discord.py를 이용하여 서울과학기술대학교의 식당의 메뉴와 공지사항을 자동으로 알려주고, 편의기능을 제공하는 Discord 봇 프로젝트 입니다.
 
 학교 공지사항의 접근성을 높히고 빈번히 오작동하는 에브리타임 기능인 오늘의 학식을 대체하기 위해, 서울과기대 학우 분들이 많이 사용하는 메신저 'Discord'의 API를 이용하는 자동화 채팅 봇을 개발하기로 했습니다.
 
@@ -39,14 +39,14 @@ discord.py를 이용하여 서울과학기술대학교의 식당의 메뉴와 �
 
 ### Working Screenshots
 #### 식단과 공지사항 푸시 알림
-![image](https://user-images.githubusercontent.com/113516890/206862508-516112ca-da61-4523-8d1c-5795b324b2c5.png) 
-![공지사항 자동알림](https://user-images.githubusercontent.com/113516890/206861974-21cf87f6-96b2-40a4-a3f8-40be6b34bc3d.png)
+![/알림설정 명령어 사용](https://user-images.githubusercontent.com/113516890/210235310-7ca6037d-9979-40d5-828e-a04b8b5c59dd.png)
+![공지사항 자동알림](https://user-images.githubusercontent.com/113516890/210235400-d9f9caa9-1e2e-4f36-a309-ae18b73eb85c.png)
 
 #### `/2학`, `/테파` 명령어 사용
-![image](https://user-images.githubusercontent.com/113516890/206862621-30b66c90-a622-429f-a106-0aab78c7af6b.png)
+![/테파 명령어 사용](https://user-images.githubusercontent.com/113516890/210235490-47ab2ff2-5b1c-437c-9df0-8c69d29d4b4c.png)
 
-#### `/날씨 n` 명령어 사용
-![image](https://user-images.githubusercontent.com/113516890/206862730-133609f4-e0a2-414e-a997-8c6b68b84432.png)
+#### `/날씨` 명령어 사용
+![/날씨 명령어 사용](https://user-images.githubusercontent.com/113516890/210235614-51a4259c-2635-4dae-b11b-030b99352573.png)
 
 ### Bug Report
 문제 발생 시 반드시 **해당 서버, 채널의 ID와 함께** issue를 작성하거나, [테크봇 공식 서버](https://discord.gg/wRXRHB7mr6)의 피드백 채널에서 문제를 알려주시기 바랍니다.
@@ -95,6 +95,8 @@ token_file = open(token_path, "r", encoding="utf-8").read().split()
 discord_bot_token = token_file[0]
 weather_api_token = token_file[1]
 ...
+
+...
 @tree.command(description='...')
 async def 날씨(interaction):
     try:
@@ -132,7 +134,6 @@ $ nohup python3 -u discordbot.py > discordbot.log 2>&1 &
 
 
 ## Reference
-* [Permission Check Discord.py Bot](https://stackoverflow.com/questions/52593777/permission-check-discord-py-bot): `/알림설정` 사용 시 권한 체크 방법에 참고했습니다.
 * [[봇 개발] 4. 디스코드 봇 만들기 - 상태 표시 下](https://gall.dcinside.com/mgallery/board/view?id=discord&no=5724): 상태 메세지를 순환 표시하기 위해 참고하였습니다.
 * [[봇 개발] 5. 디스코드 봇 만들기 - Embed](https://gall.dcinside.com/mgallery/board/view/?id=discord&no=5852): Embed 코드 작성에 참고하였습니다.
 * [[Python] 공공 open API 실습 프로젝트](https://velog.io/@yebinlee/Python-API-%EC%8B%A4%EC%8A%B5): 날씨 API 응용, json 파싱에 참고하였습니다.
