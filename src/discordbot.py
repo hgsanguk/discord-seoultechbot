@@ -23,8 +23,8 @@ print("오픈 API 기상청 단기예보 조회서비스 Token: ", weather_api_t
 bot = discord.Client(intents=discord.Intents.all())
 tree = app_commands.CommandTree(bot)
 global status
-CRAWLING_PERIOD = 2
-BOT_VERSION = 'v1.0'
+CRAWLING_PERIOD = 1
+BOT_VERSION = 'v1.1'
 food_notification_time = [datetime.time(hour=i, minute=0,
                                         tzinfo=datetime.timezone(datetime.timedelta(hours=9))) for i in range(9, 13)]
 notice_crawling_time = [datetime.time(hour=i, minute=30,
@@ -56,7 +56,7 @@ async def on_ready():
     await food_crawling()
     await bot.change_presence(status=discord.Status.online)
     await tree.sync()
-    print('봇 실행 완료.')
+    print(f'{datetime.datetime.now()}: 봇 실행 완료')
 
 
 @bot.event
@@ -103,6 +103,7 @@ async def 테파(interaction):
 @tree.command(description='현재 캠퍼스의 날씨와 1 ~ 6시간 뒤 날씨 예보를 보여줍니다.')
 async def 날씨(interaction):
     try:
+        await interaction.response.defer()
         date = weather.get_weather(weather_api_token)[0]
         data = weather.get_weather(weather_api_token)[1]
 
@@ -160,21 +161,30 @@ async def 날씨(interaction):
 
         embed.add_field(name='날씨 예보', value=result_str, inline=False)
         embed.set_footer(text='기상청 초단기예보 조회 서비스 오픈 API를 이용한 것으로, 실제 기상상황과 차이가 있을 수 있습니다.')
-        await interaction.response.send_message(embed=embed)
-    except ValueError:
-        await interaction.response.send_message('날씨 정보를 불러오는 중 오류가 발생했습니다.')
+
+        await interaction.followup.send(embed=embed)
+    except weather.requests.ConnectTimeout:
+        await interaction.followup.send('날씨를 불러오는 중 문제가 발생했습니다. 다시 시도해주세요.')
+
 
 
 @tree.command(description='테크봇의 명령어 목록과 설명을 보여줍니다.')
 async def 도움(interaction):
     embed = discord.Embed(title="봇 명령어 목록", color=0x711E92)
     embed.add_field(name=':warning:주의사항:warning:', value='**봇 입장 후 `/알림설정` 명령어를 사용해야 학교 공지사항과 학식 알림을 받을 수 있습니다.**\n'
-                                                         '학교 공지사항은 학교 홈페이지의 **대학공지사항, 학사공지, 장학공지, 생활관공지(선택)**를 알려드립니다. '
+                                                         '학교 공지사항은 학교 홈페이지의 **대학공지사항, 학사공지, 장학공지, [선택]생활관공지**를 알려드립니다. '
                                                          '이외의 공지사항은 학교 홈페이지를 참고하시기 바랍니다.\n', inline=False)
     embed.add_field(name='`/2학`', value='제2학생회관의 오늘 식단표를 보여줍니다.', inline=False)
     embed.add_field(name='`/테파`', value='테크노파크의 이번 주 식단표를 보여줍니다.', inline=False)
     embed.add_field(name='`/날씨`', value='현재 캠퍼스의 날씨와 1 ~ 6시간 뒤 날씨 예보를 보여줍니다.', inline=False)
+    embed.add_field(name='`/핑`', value='명령어 입력 시점부터 메세지 전송까지 총 지연시간을 보여줍니다.', inline=False)
     embed.add_field(name='`/알림설정 [학식알림] [생활관공지알림]`', value='알림을 설정하는 명령어입니다. 해당 명령어를 입력한 채널이 각종 알림을 받을 채널이 됩니다. (해당 명령어의 사용자는 관리자 권한이 있어야 합니다.)', inline=False)
+    await interaction.response.send_message(embed=embed)
+
+
+@tree.command(description='명령어 입력 시점부터 메세지 전송까지 총 지연시간을 보여줍니다.')
+async def 핑(interaction):
+    embed = discord.Embed(title=':ping_pong: 퐁!', description=f'지연시간: {round(bot.latency * 1000)} ms', color=0x711E92)
     await interaction.response.send_message(embed=embed)
 
 
@@ -199,19 +209,22 @@ async def 알림설정(interaction, 학식알림: app_commands.Choice[int], 생�
         embed = discord.Embed(title=f':white_check_mark: {interaction.guild.name}의 알림 설정 결과',
                               description=f'알림 받을 채널 이름: `{interaction.channel.name}`', color=0x711E92)
 
+        setting_log = f'{datetime.datetime.now()}: {interaction.guild.name}({interaction.guild.id}) 서버의 {interaction.channel.name}({interaction.channel.id}) 채널에서 알림 받을 채널 설정.'
         if arg1 == 0:
-            print(f'{interaction.guild.name}({interaction.guild.id}) 서버의 {interaction.channel.name}({interaction.channel.id}) 채널에서 알림 받을 채널 설정. 학식 알림 받지 않음.')
+            setting_log += ' 학식 알림 받지 않음.'
             embed.add_field(name='학식 알림', value='`받지 않음`')
         elif 9 <= arg1 <= 12:
-            print(f'{interaction.guild.name}({interaction.guild.id}) 서버의 {interaction.channel.name}({interaction.channel.id}) 채널에서 알림 받을 채널 설정. 학식 알림 시간: {arg1}시')
+            setting_log += f' 학식 알림 시간: {arg1}시.'
             embed.add_field(name='학식 알림', value=f'`{arg1}시 정각에 받음`')
 
         if arg2 == 1:
-            print(f'{interaction.guild.name}({interaction.guild.id}) 서버의 {interaction.channel.name}({interaction.channel.id}) 채널에서 기숙사 알림 켬')
+            setting_log += ' 기숙사 알림 켬.'
             embed.add_field(name='생활관 공지 알림', value='`받음`')
         else:
-            print(f'{interaction.guild.name}({interaction.guild.id}) 서버의 {interaction.channel.name}({interaction.channel.id}) 채널에서 기숙사 알림 끔')
+            setting_log += ' 기숙사 알림 끔.'
             embed.add_field(name='생활관 공지 알림', value='`받지 않음`')
+
+        print(setting_log)
         await interaction.response.send_message(embed=embed)
 
 
@@ -224,29 +237,29 @@ async def food_crawling():
         try:
             menucrawler.get_sc2_menu(int(today.strftime('%y%m%d')))
         except IndexError:
-            print(f'{today}에 제2학생회관 식단 크롤링 시도...')
+            print(f'{today}: 제2학생회관 식단 크롤링 시도...')
             menucrawler.student_cafeteria_2()
         try:
             menucrawler.get_technopark_menu(int(today.strftime('%y%W')))
         except IndexError:
-            print(f'{today}에 서울테크노파크 식단 크롤링 시도...')
+            print(f'{today}: 서울테크노파크 식단 크롤링 시도...')
             menucrawler.technopark()
 
 
 @tasks.loop(time=notice_crawling_time)
 async def notice_crawling():
-    print(f'{datetime.datetime.now()}에 공지사항 크롤링 시도...')
+    print(f'{datetime.datetime.now()}: 공지사항 크롤링 시도...')
     try:
         new_univ_notice = noticecrawler.get_notice('notice', 'University')
         new_affairs_notice = noticecrawler.get_notice('matters', 'Affairs')
         new_scholarship_notice = noticecrawler.get_notice('janghak', 'Scholarship')
         new_dormitory_notice = noticecrawler.get_domi_notice()
-    except ConnectionError:
+    except noticecrawler.requests.ConnectTimeout:
         new_univ_notice = []
         new_affairs_notice = []
         new_scholarship_notice = []
         new_dormitory_notice = []
-        print('학교 홈페이지 연결 실패. 다음 주기에 다시 시도합니다.')
+        print(f'{datetime.datetime.now()}: 학교 홈페이지 연결 실패. 다음 주기에 다시 시도합니다.')
 
     univ_notice_embed = discord.Embed(title="새 대학공지사항", color=0xA4343A)
     scholarship_embed = discord.Embed(title="새 장학공지", color=0x333F48)
@@ -261,7 +274,7 @@ async def notice_crawling():
 
     channels = server_bot_settings.get_channel_all()
     if len(new_univ_notice) > 0 or len(new_affairs_notice) > 0 or len(new_scholarship_notice) > 0:
-        print(f'알림 설정한 서버들을 대상으로 새 공지사항 알림을 전송합니다.')
+        print(f'{datetime.datetime.now()}: 알림 설정한 서버들을 대상으로 새 공지사항 알림을 전송합니다.')
         for channel_id in channels:
             try:
                 channel = bot.get_channel(channel_id[0])
@@ -271,7 +284,8 @@ async def notice_crawling():
                     await channel.send(embed=affairs_embed)
                 if len(new_scholarship_notice) > 0:
                     await channel.send(embed=scholarship_embed)
-            except Exception:
+            except Exception as e:
+                print(f'{datetime.datetime.now()}: {channel_id[0]} 채널에 알림을 보낼 수 없습니다. 예외 이름: {e}')
                 continue
 
     if len(new_dormitory_notice) > 0:
@@ -280,12 +294,13 @@ async def notice_crawling():
         for row in new_dormitory_notice:
             embed.add_field(name=f'{row[1]}', value=f'[{row[0]}]({row[2]})', inline=False)
 
-        print(f'알림 설정한 서버들을 대상으로 새 생활관공지 알림을 전송합니다.')
+        print(f'{datetime.datetime.now()}: 알림 설정한 서버들을 대상으로 새 생활관공지 알림을 전송합니다.')
         for channel_id in channels_domi:
             try:
                 channel = bot.get_channel(channel_id[0])
                 await channel.send(embed=embed)
-            except Exception:
+            except Exception as e:
+                print(f'{datetime.datetime.now()}: {channel_id[0]} 채널에 알림을 보낼 수 없습니다. 예외 이름: {e}')
                 continue
 
     global status
@@ -298,7 +313,7 @@ async def food_notification():
     if now.weekday() < 5:
         channels = server_bot_settings.get_channel(now.hour)
         if len(channels) > 0:
-            print(f'{now}에 {now.hour}시 알림 설정한 서버들을 대상으로 알림을 전송합니다.')
+            print(f'{now}: {now.hour}시 알림 설정한 서버들을 대상으로 알림을 전송합니다.')
             for channel_id in channels:
                 try:
                     channel = bot.get_channel(channel_id[0])
@@ -326,10 +341,11 @@ async def food_notification():
                     except IndexError:
                         embed = discord.Embed(title="테크노파크", description='이번 주에 등록된 식단표가 없습니다.', color=0x0950A1)
                         await channel.send(embed=embed)
-                except Exception:
+                except Exception as e:
+                    print(f'{datetime.datetime.now()}: {channel_id[0]} 채널에 알림을 보낼 수 없습니다. 예외 이름: {e}')
                     continue
         else:
-            print(f'{now} 시점에 {now.hour}시 알림 설정한 서버가 없습니다.')
+            print(f'{now}: {now.hour}시 알림 설정한 서버가 없습니다.')
 
 
 @tasks.loop(seconds=3)

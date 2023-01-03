@@ -25,6 +25,7 @@ discord.py를 이용하여 서울과학기술대학교의 식당의 메뉴와 �
     * `[생활관공지알림]`의 선택지: 받지 않음, 받음
     * **해당 명령어의 사용자는 관리자 권한이 있어야 합니다.**
     * 봇 초대 후 이 명령어를 입력하지 않으면 공지사항 알림, 학식 자동 알림을 받을 수 없습니다. 아래의 명령어는 정상작동 합니다.
+  * `/핑`: 명령어 입력 시점부터 메세지 전송까지 총 지연시간을 보여줍니다.
 
 
 * 학교 생활 명령어
@@ -101,6 +102,7 @@ weather_api_token = token_file[1]
 @tree.command(description='...')
 async def 날씨(interaction):
     try:
+        await interaction.response.defer()
         date = weather.get_weather(weather_api_token)[0]
         data = weather.get_weather(weather_api_token)[1]
         ...
