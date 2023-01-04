@@ -77,7 +77,7 @@ async def _2학(interaction):
         day_str = '{today.month}월 {today.day}일 식단표'.format(today=today)
         food_data = menucrawler.get_sc2_menu(int(today.strftime('%y%m%d')))
         embed = discord.Embed(title="제2학생회관", description=day_str, color=0x73BF1F)
-        embed.add_field(name=f"점심: {food_data[0]} `{food_data[1]}`", value=f"{food_data[0]}", inline=False)
+        embed.add_field(name=f"점심: {food_data[0]} `{food_data[1]}`", value=f"{food_data[2]}", inline=False)
         if food_data[3] != '간단 snack':
             embed.add_field(name=f"점심: {food_data[3]} `{food_data[4]}`", value=f"{food_data[5]}", inline=False)
         embed.add_field(name=f"저녁: {food_data[6]} `{food_data[7]}`", value=f"{food_data[8]}", inline=False)
@@ -321,7 +321,7 @@ async def food_notification():
                         day_str = '{today.month}월 {today.day}일 식단표'.format(today=now)
                         food_data = menucrawler.get_sc2_menu(int(now.strftime('%y%m%d')))
                         embed = discord.Embed(title="제2학생회관", description=day_str, color=0x73BF1F)
-                        embed.add_field(name=f"점심: {food_data[0]} `{food_data[1]}`", value=f"{food_data[0]}",
+                        embed.add_field(name=f"점심: {food_data[0]} `{food_data[1]}`", value=f"{food_data[2]}",
                                         inline=False)
                         if food_data[3] != '간단 snack':
                             embed.add_field(name=f"점심: {food_data[3]} `{food_data[4]}`", value=f"{food_data[5]}",
