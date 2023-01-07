@@ -1,8 +1,16 @@
-/src/food.db
-/src/geckodriver.log
-/src/server_settings.db
+# venv directory
 /venv/
+
+# WebDriver Files
+/src/*driver*
+
+# DB Files
+/src/food.db
+/src/server_settings.db
 /src/notice.db
-/src/geckodriver.exe
-/src/discordbot.log
+
+# TechBot logs
+/src/*.log
+
+# Tokens
 /src/token

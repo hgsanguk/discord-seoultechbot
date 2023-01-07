@@ -9,7 +9,7 @@ discord.py를 이용하여 서울과학기술대학교의 식당의 메뉴와 �
 
 ## Release
 우측의 Releases를 클릭하여 이 프로젝트의 안정적인 버전을 사용한 '테크봇'을 초대할 수 있습니다.
-봇/코드 업데이트 시 변경사항도 Releases를 통해 안내할 예정입니다.
+봇/코드 업데이트 시 변경사항은 Releases와 [테크봇 공식 서버](https://discord.gg/wRXRHB7mr6)의 `#봇-공지`채널을 통해 안내할 예정입니다.
 
 ### Features and Commands
 * 공지사항과 학식 자동 알림
@@ -72,12 +72,13 @@ git을 사용해 위의 명령어로 이 Repository를 clone하여 최신 버전
 ### Internet Browser
 이 봇은 Selenium을 사용하므로 Web Driver를 요구합니다. 이 코드의 경우 Firefox와 이 브라우저에 쓰이는 엔진인 Gecko를 사용합니다.
 다른 브라우저 사용 시 그에 맞는 버전의 Web Driver를 로걸 저장소의 src와 같은 위치에 다운로드하고, `menucrawler.py`의 아래 부분을 알맞게 수정하시면 됩니다.
-``` python 
+```python 
 ...
 from selenium.webdriver.firefox.options import Options
 ...
 def load_browser(url):
-    ...
+    options = Options()
+    options.headless = True
     driver = webdriver.Firefox(options=options)
     ...
 ```
