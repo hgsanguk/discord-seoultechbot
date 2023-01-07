@@ -24,7 +24,7 @@ bot = discord.Client(intents=discord.Intents.all())
 tree = app_commands.CommandTree(bot)
 global status
 CRAWLING_PERIOD = 1
-BOT_VERSION = 'v1.1'
+BOT_VERSION = 'v1.1.1'
 food_notification_time = [datetime.time(hour=i, minute=0,
                                         tzinfo=datetime.timezone(datetime.timedelta(hours=9))) for i in range(9, 13)]
 notice_crawling_time = [datetime.time(hour=i, minute=30,
@@ -46,7 +46,7 @@ async def on_ready():
     food_notification.start()
     change_status.start()
     global status
-    status = cycle(['명령어: /도움', f'{BOT_VERSION}', f'{len(bot.guilds)}개의 서버와 함께'])
+    status = cycle(['도움말: /도움', f'{BOT_VERSION}', f'{len(bot.guilds)}개의 서버와 함께'])
 
     noticecrawler.get_notice('notice', 'University')
     noticecrawler.get_notice('matters', 'Affairs')
@@ -116,7 +116,7 @@ async def 날씨(interaction):
         else:
             color = 0x000080
 
-        embed = discord.Embed(title="오늘의 캠퍼스 날씨",
+        embed = discord.Embed(title="이 시간 캠퍼스 날씨",
                               description='{day.month}월 {day.day}일 {day.hour}시 {day.minute}분 공릉동의 날씨입니다.'
                               .format(day=date), color=color)
         string_1 = ':droplet: 습도: ' + data[0][5] + '%\n:dash: 바람: ' + data[0][7] + '(' + data[0][6] + '°) 방향으로 ' + data[0][8] + 'm/s'
@@ -285,7 +285,7 @@ async def notice_crawling():
                 if len(new_scholarship_notice) > 0:
                     await channel.send(embed=scholarship_embed)
             except Exception as e:
-                print(f'{datetime.datetime.now()}: {channel_id[0]} 채널에 알림을 보낼 수 없습니다. 예외 이름: {e}')
+                print(f'{datetime.datetime.now()}: {channel_id[0]} 채널에 알림을 보낼 수 없습니다. 예외명: {e}')
                 continue
 
     if len(new_dormitory_notice) > 0:
@@ -300,11 +300,11 @@ async def notice_crawling():
                 channel = bot.get_channel(channel_id[0])
                 await channel.send(embed=embed)
             except Exception as e:
-                print(f'{datetime.datetime.now()}: {channel_id[0]} 채널에 알림을 보낼 수 없습니다. 예외 이름: {e}')
+                print(f'{datetime.datetime.now()}: {channel_id[0]} 채널에 알림을 보낼 수 없습니다. 예외명: {e}')
                 continue
 
     global status
-    status = cycle(['명령어: /도움', f'{BOT_VERSION}', f'{len(bot.guilds)}개의 서버와 함께'])
+    status = cycle(['도움말: /도움', f'{BOT_VERSION}', f'{len(bot.guilds)}개의 서버와 함께'])
 
 
 @tasks.loop(time=food_notification_time)
@@ -312,37 +312,33 @@ async def food_notification():
     now = datetime.datetime.now()
     if now.weekday() < 5:
         channels = server_bot_settings.get_channel(now.hour)
+        try:
+            day_str = '{today.month}월 {today.day}일 식단표'.format(today=now)
+            food_data = menucrawler.get_sc2_menu(int(now.strftime('%y%m%d')))
+            sc2_embed = discord.Embed(title="제2학생회관", description=day_str, color=0x73BF1F)
+            sc2_embed.add_field(name=f"점심: {food_data[0]} `{food_data[1]}`", value=f"{food_data[2]}", inline=False)
+            if food_data[3] != '간단 snack':
+                sc2_embed.add_field(name=f"점심: {food_data[3]} `{food_data[4]}`", value=f"{food_data[5]}", inline=False)
+            sc2_embed.add_field(name=f"저녁: {food_data[6]} `{food_data[7]}`", value=f"{food_data[8]}", inline=False)
+        except IndexError:
+            sc2_embed = discord.Embed(title="제2학생회관", description='오늘 등록된 식단표가 없습니다.', color=0x73BF1F)
+
+        try:
+            food_data = menucrawler.get_technopark_menu(int(now.strftime('%y%W')))
+            tp_embed = discord.Embed(title="테크노파크", description=f"{food_data[0]}", color=0x0950A1)
+            tp_embed.set_image(url=f"{food_data[1]}")
+        except IndexError:
+            tp_embed = discord.Embed(title="테크노파크", description='이번 주에 등록된 식단표가 없습니다.', color=0x0950A1)
+
         if len(channels) > 0:
             print(f'{now}: {now.hour}시 알림 설정한 서버들을 대상으로 알림을 전송합니다.')
             for channel_id in channels:
                 try:
                     channel = bot.get_channel(channel_id[0])
-                    try:
-                        day_str = '{today.month}월 {today.day}일 식단표'.format(today=now)
-                        food_data = menucrawler.get_sc2_menu(int(now.strftime('%y%m%d')))
-                        embed = discord.Embed(title="제2학생회관", description=day_str, color=0x73BF1F)
-                        embed.add_field(name=f"점심: {food_data[0]} `{food_data[1]}`", value=f"{food_data[2]}",
-                                        inline=False)
-                        if food_data[3] != '간단 snack':
-                            embed.add_field(name=f"점심: {food_data[3]} `{food_data[4]}`", value=f"{food_data[5]}",
-                                            inline=False)
-                        embed.add_field(name=f"저녁: {food_data[6]} `{food_data[7]}`", value=f"{food_data[8]}",
-                                        inline=False)
-                        await channel.send(embed=embed)
-                    except IndexError:
-                        embed = discord.Embed(title="제2학생회관", description='오늘 등록된 식단표가 없습니다.', color=0x73BF1F)
-                        await channel.send(embed=embed)
-
-                    try:
-                        food_data = menucrawler.get_technopark_menu(int(now.strftime('%y%W')))
-                        embed = discord.Embed(title="테크노파크", description=f"{food_data[0]}", color=0x0950A1)
-                        embed.set_image(url=f"{food_data[1]}")
-                        await channel.send(embed=embed)
-                    except IndexError:
-                        embed = discord.Embed(title="테크노파크", description='이번 주에 등록된 식단표가 없습니다.', color=0x0950A1)
-                        await channel.send(embed=embed)
+                    await channel.send(embed=sc2_embed)
+                    await channel.send(embed=tp_embed)
                 except Exception as e:
-                    print(f'{datetime.datetime.now()}: {channel_id[0]} 채널에 알림을 보낼 수 없습니다. 예외 이름: {e}')
+                    print(f'{datetime.datetime.now()}: {channel_id[0]} 채널에 알림을 보낼 수 없습니다. 예외명: {e}')
                     continue
         else:
             print(f'{now}: {now.hour}시 알림 설정한 서버가 없습니다.')
