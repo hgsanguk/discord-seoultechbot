@@ -67,7 +67,7 @@ git을 사용해 위의 명령어로 이 Repository를 clone하여 최신 버전
 3. requests
 4. beautifulsoup4
 
-해당 패키지들은 로컬 저장소 디렉토리 내에서 `$ pip install -r techbot-packages.txt` 명령어로 한 번에 설치 가능합니다.
+해당 모듈은 `$ pip install -r discord-seoultechbot/techbot-packages.txt` 명령어로 한 번에 설치 가능합니다.
 
 ### Internet Browser
 이 봇은 Selenium을 사용하므로 Web Driver를 요구합니다. 이 코드의 경우 Firefox와 이 브라우저에 쓰이는 엔진인 Gecko를 사용합니다.
@@ -85,7 +85,7 @@ def load_browser(url):
 
 ### Token
 Discord 봇을 만들기 위해 Discord 계정, [Discord Developers Portal](https://discord.com/developers/)의 Applications > 내 앱 > Bot에서 모든 Intents 옵션과 토큰이 필요합니다.
-또한 `/날씨 n` 명령어를 사용하려면 [오픈 API의 기상청 단기예보 조회서비스](https://www.data.go.kr/data/15084084/openapi.do)에서 인증키를 발급 받아야 합니다.
+또한 `/날씨` 명령어를 사용하려면 [오픈 API의 기상청 단기예보 조회서비스](https://www.data.go.kr/data/15084084/openapi.do)에서 인증키를 발급 받아야 합니다.
 
 토큰을 요구하는 부분은 아래와 같습니다.
 
@@ -115,7 +115,7 @@ bot.run(discord_bot_token)
 
 ### Run
 ```shell
-$ cd /discord-seoultechbot/src
+$ cd discord-seoultechbot/src
 $ nohup python3 -u discordbot.py > discordbot.log 2>&1 &
 ```
 백그라운드에서 봇이 실행되며, `discordbot.log` 파일에서 로그를 확인해볼 수 있습니다.
@@ -135,12 +135,6 @@ $ nohup python3 -u discordbot.py > discordbot.log 2>&1 &
 * `food.db`: 학교 홈페이지에서 크롤링 한 식단을 저장하는 데이터베이스 파일입니다.
 * `notice.db`: 학교 공지사항의 게시글 번호를 저장하는 데이터베이스 파일입니다.
 * `server_settings.db`: 각 서버에서 설정한 알림 받을 채널의 ID를 저장하는 데이터베이스 파일입니다.
-
-
-## Reference
-* [[봇 개발] 4. 디스코드 봇 만들기 - 상태 표시 下](https://gall.dcinside.com/mgallery/board/view?id=discord&no=5724): 상태 메세지를 순환 표시하기 위해 참고하였습니다.
-* [[봇 개발] 5. 디스코드 봇 만들기 - Embed](https://gall.dcinside.com/mgallery/board/view/?id=discord&no=5852): Embed 코드 작성에 참고하였습니다.
-* [[Python] 공공 open API 실습 프로젝트](https://velog.io/@yebinlee/Python-API-%EC%8B%A4%EC%8A%B5): 날씨 API 응용, json 파싱에 참고하였습니다.
 
 ## License
 * 이 프로젝트의 라이센스는 GNU GPL 3.0이며, 자세한 내용은 `LICENSE`를 참고하시기 바랍니다.
