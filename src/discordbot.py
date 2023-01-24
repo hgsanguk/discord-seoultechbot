@@ -24,7 +24,7 @@ bot = discord.Client(intents=discord.Intents.all())
 tree = app_commands.CommandTree(bot)
 global status
 CRAWLING_PERIOD = 1
-BOT_VERSION = 'v1.1.1'
+BOT_VERSION = 'v1.2'
 food_notification_time = [datetime.time(hour=i, minute=0,
                                         tzinfo=datetime.timezone(datetime.timedelta(hours=9))) for i in range(9, 13)]
 notice_crawling_time = [datetime.time(hour=i, minute=30,
@@ -171,7 +171,7 @@ async def 날씨(interaction):
 @tree.command(description='테크봇의 명령어 목록과 설명을 보여줍니다.')
 async def 도움(interaction):
     embed = discord.Embed(title="봇 명령어 목록", color=0x711E92)
-    embed.add_field(name=':warning:주의사항:warning:', value='**봇 입장 후 `/알림설정` 명령어를 사용해야 학교 공지사항과 학식 알림을 받을 수 있습니다.**\n'
+    embed.add_field(name=':warning:주의사항:warning:', value='**봇 입장 후 `/알림설정` 명령어를 사용해야 학교 공지사항과 학사일정, 학식 알림을 받을 수 있습니다.**\n'
                                                          '학교 공지사항은 학교 홈페이지의 **대학공지사항, 학사공지, 장학공지, [선택]생활관공지**를 알려드립니다. '
                                                          '이외의 공지사항은 학교 홈페이지를 참고하시기 바랍니다.\n', inline=False)
     embed.add_field(name='`/2학`', value='제2학생회관의 오늘 식단표를 보여줍니다.', inline=False)
@@ -228,7 +228,7 @@ async def 알림설정(interaction, 학식알림: app_commands.Choice[int], 생�
         await interaction.response.send_message(embed=embed)
 
 
-# 여기서부터 봇의 자동화 관련 코드입니다.
+# 여기서부터 봇의 자동화 작업 코드입니다.
 
 @tasks.loop(time=food_crawling_time)
 async def food_crawling():
@@ -266,11 +266,11 @@ async def notice_crawling():
     affairs_embed = discord.Embed(title="새 학사공지", color=0x00205B)
 
     for row in new_univ_notice:
-        univ_notice_embed.add_field(name=f'{row[1]}', value=f'[{row[0]}]({row[2]})', inline=False)
+        univ_notice_embed.add_field(name=row[1], value=f'[{row[0]}]({row[2]})', inline=False)
     for row in new_affairs_notice:
-        affairs_embed.add_field(name=f'{row[1]}', value=f'[{row[0]}]({row[2]})', inline=False)
+        affairs_embed.add_field(name=row[1], value=f'[{row[0]}]({row[2]})', inline=False)
     for row in new_scholarship_notice:
-        scholarship_embed.add_field(name=f'{row[1]}', value=f'[{row[0]}]({row[2]})', inline=False)
+        scholarship_embed.add_field(name=row[1], value=f'[{row[0]}]({row[2]})', inline=False)
 
     channels = server_bot_settings.get_channel_all()
     if len(new_univ_notice) > 0 or len(new_affairs_notice) > 0 or len(new_scholarship_notice) > 0:
@@ -292,7 +292,7 @@ async def notice_crawling():
         embed = discord.Embed(title="새 생활관공지", color=0x007EE9)
         channels_domi = server_bot_settings.get_channel_dormitory()
         for row in new_dormitory_notice:
-            embed.add_field(name=f'{row[1]}', value=f'[{row[0]}]({row[2]})', inline=False)
+            embed.add_field(name=row[1], value=f'[{row[0]}]({row[2]})', inline=False)
 
         print(f'{datetime.datetime.now()}: 알림 설정한 서버들을 대상으로 새 생활관공지 알림을 전송합니다.')
         for channel_id in channels_domi:
@@ -325,8 +325,8 @@ async def food_notification():
 
         try:
             food_data = menucrawler.get_technopark_menu(int(now.strftime('%y%W')))
-            tp_embed = discord.Embed(title="테크노파크", description=f"{food_data[0]}", color=0x0950A1)
-            tp_embed.set_image(url=f"{food_data[1]}")
+            tp_embed = discord.Embed(title="테크노파크", description=food_data[0], color=0x0950A1)
+            tp_embed.set_image(url=food_data[1])
         except IndexError:
             tp_embed = discord.Embed(title="테크노파크", description='이번 주에 등록된 식단표가 없습니다.', color=0x0950A1)
 
@@ -340,8 +340,31 @@ async def food_notification():
                 except Exception as e:
                     print(f'{datetime.datetime.now()}: {channel_id[0]} 채널에 알림을 보낼 수 없습니다. 예외명: {e}')
                     continue
-        else:
-            print(f'{now}: {now.hour}시 알림 설정한 서버가 없습니다.')
+
+
+@tasks.loop(time=datetime.time(hour=0, minute=0, tzinfo=datetime.timezone(datetime.timedelta(hours=9))))
+async def schedule_notification():
+    now = datetime.datetime.now()
+    schedule = noticecrawler.get_univ_schedule()
+    schedule_embed = discord.Embed(title='오늘의 일정', description='오늘 시작하거나 끝나는 일정입니다.', color=0x427EE2)
+    channels = server_bot_settings.get_channel_all()
+    if len(schedule) > 0:
+        for row in schedule:
+            if '\n\n' in row:
+                task = row.split('\n\n')[0]
+                date = row.split('\n\n')[1]
+                schedule_embed.add_field(name=task, value=date, inline=False)
+            else:
+                schedule_embed.add_field(name=row, value=now.strftime('%Y.%m.%d'), inline=False)
+    if len(channels) > 0:
+        print(f'{now}: 알림 설정한 서버들을 대상으로 오늘의 일정 알림을 전송합니다.')
+        for channel_id in channels:
+            try:
+                channel = bot.get_channel(channel_id[0])
+                await channel.send(embed=schedule_embed)
+            except Exception as e:
+                print(f'{datetime.datetime.now()}: {channel_id[0]} 채널에 알림을 보낼 수 없습니다. 예외명: {e}')
+                continue
 
 
 @tasks.loop(seconds=3)

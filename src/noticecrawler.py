@@ -1,5 +1,7 @@
 import sqlite3
 import requests
+import datetime
+import re
 from bs4 import BeautifulSoup
 
 notice_db = sqlite3.connect("notice.db", isolation_level=None)
@@ -65,3 +67,13 @@ def get_domi_notice():
         cur.execute('DELETE FROM Dormitory WHERE board_index = (SELECT min(board_index) FROM Dormitory)')
         count -= 1
     return new_notice
+
+
+def get_univ_schedule():
+    response = requests.get('https://eclass.seoultech.ac.kr/ilos/main/main_schedule_view.acl?viewDt=' + datetime.date.today().strftime('%Y-%m-%d'))
+    parser = BeautifulSoup(response.text, "html.parser")
+    rows = parser.find_all(class_='changeDetile schedule-Detail-Box')
+    schedule = []
+    for row in rows:
+        schedule.append(row.text.strip())
+    return schedule
