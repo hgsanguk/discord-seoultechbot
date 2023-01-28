@@ -51,12 +51,13 @@ async def on_ready():
     global status
     status = cycle(['도움말: /도움', f'{BOT_VERSION}', f'{len(bot.guilds)}개의 서버와 함께'])
 
-    # 알림 한꺼번에 보내지 않도록 미리 알림을 담음
+    # 알림을 한꺼번에 보내지 않도록 미리 알림을 크롤링해서 DB로 담음
     noticecrawler.get_notice('notice', 'University')
     noticecrawler.get_notice('matters', 'Affairs')
     noticecrawler.get_notice('janghak', 'Scholarship')
     noticecrawler.get_domi_notice()
 
+    # 오늘의 식단을 크롤링
     await food_crawling()
     await bot.change_presence(status=discord.Status.online)
     await tree.sync()
@@ -78,9 +79,11 @@ async def on_guild_join(guild):
 @app_commands.choices(날짜=[app_commands.Choice(name='내일', value=1)])
 @app_commands.describe(날짜='보고 싶은 식단표의 날짜를 선택합니다.')
 async def _2학(interaction, 날짜: app_commands.Choice[int] = 0):
+    day = datetime.datetime.now()
+    day_str = '오늘'
     try:
-        day = datetime.datetime.now()
         if 날짜 != 0:
+            day_str = '내일'
             day += datetime.timedelta(days=날짜.value)
             if day.weekday() >= 5:
                 raise IndexError
@@ -88,7 +91,7 @@ async def _2학(interaction, 날짜: app_commands.Choice[int] = 0):
                 menucrawler.get_sc2_menu(int(day.strftime('%y%m%d')))
             except IndexError:
                 menucrawler.student_cafeteria_2(tomorrow=True)
-        day_str = '{today.month}월 {today.day}일 식단표'.format(today=day)
+        day_str = '{today.month}월 {today.day}일 식단'.format(today=day)
         food_data = menucrawler.get_sc2_menu(int(day.strftime('%y%m%d')))
         embed = discord.Embed(title="제2학생회관", description=day_str, color=0x73BF1F)
         embed.add_field(name=f"점심: {food_data[0]} `{food_data[1]}`", value=f"{food_data[2]}", inline=False)
@@ -97,7 +100,7 @@ async def _2학(interaction, 날짜: app_commands.Choice[int] = 0):
         embed.add_field(name=f"저녁: {food_data[6]} `{food_data[7]}`", value=f"{food_data[8]}", inline=False)
         await interaction.response.send_message(embed=embed)
     except IndexError:
-        embed = discord.Embed(title="제2학생회관", description='오늘 등록된 식단표가 없습니다.', color=0x73BF1F)
+        embed = discord.Embed(title="제2학생회관", description=day_str + ' 등록된 식단이 없습니다.', color=0x73BF1F)
         await interaction.response.send_message(embed=embed)
 
 
@@ -181,14 +184,13 @@ async def 날씨(interaction):
         await interaction.followup.send('날씨를 불러오는 중 문제가 발생했습니다. 다시 시도해주세요.')
 
 
-
 @tree.command(description='테크봇의 명령어 목록과 설명을 보여줍니다.')
 async def 도움(interaction):
     embed = discord.Embed(title="봇 명령어 목록", color=0x711E92)
     embed.add_field(name=':warning:주의사항:warning:', value='**봇 입장 후 `/알림설정` 명령어를 사용해야 학교 공지사항과 학사일정, 학식 알림을 받을 수 있습니다.**\n'
                                                          '학교 공지사항은 학교 홈페이지의 **대학공지사항, 학사공지, 장학공지, [선택]생활관공지**를 알려드립니다. '
                                                          '이외의 공지사항은 학교 홈페이지를 참고하시기 바랍니다.\n', inline=False)
-    embed.add_field(name='`/2학`', value='제2학생회관의 오늘 식단표를 보여줍니다.', inline=False)
+    embed.add_field(name='`/2학 [날짜]`', value='제2학생회관의 오늘 식단을 보여줍니다. `[날짜]` 옵션으로 내일의 식단을 볼 수 있습니다.', inline=False)
     embed.add_field(name='`/테파`', value='테크노파크의 이번 주 식단표를 보여줍니다.', inline=False)
     embed.add_field(name='`/날씨`', value='현재 캠퍼스의 날씨와 1 ~ 6시간 뒤 날씨 예보를 보여줍니다.', inline=False)
     embed.add_field(name='`/핑`', value='명령어 입력 시점부터 메세지 전송까지 총 지연시간을 보여줍니다.', inline=False)
