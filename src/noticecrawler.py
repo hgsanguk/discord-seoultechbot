@@ -1,7 +1,6 @@
 import sqlite3
 import requests
 import datetime
-import re
 from bs4 import BeautifulSoup
 
 notice_db = sqlite3.connect("notice.db", isolation_level=None)

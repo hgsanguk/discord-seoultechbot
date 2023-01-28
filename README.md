@@ -7,14 +7,16 @@ discord.py를 이용하여 서울과학기술대학교의 식당의 메뉴와 �
 서울과학기술대학교 컴퓨터공학과의 2022학년도 2학기 전공선택 과목 '오픈소스소프트웨어', '데이터베이스'의 개인 프로젝트로 시작하여, 해당 코드를 사용한 봇을 배포했습니다.
 스스로 사용할 목적으로 만든 프로젝트라서 꾸준히 유지보수, 기능 추가와 최적화를 거칠 계획입니다.
 
+
 ## Release
 우측의 Releases를 클릭하여 이 프로젝트의 안정적인 버전을 사용한 '테크봇'을 초대할 수 있습니다.
 봇/코드 업데이트 시 변경사항은 Releases와 [테크봇 공식 서버](https://discord.gg/wRXRHB7mr6)의 `#봇-공지`채널을 통해 안내할 예정입니다.
 
+
 ### Features and Commands
 * 공지사항과 학식 자동 알림
   * 매일 자정 `/알림설정` 명령어를 사용한 채널에 오늘의 학사일정을 보냅니다.
-  * 2시간 간격으로 학교 홈페이지의 학교공지사항, 학사공지, 장학공지, *생활관공지(선택)* 를 체크하여, 새 공지사항이 올라왔다면 `/알림설정` 명령어를 사용한 채널에 알림을 보냅니다.
+  * 1시간 간격으로 학교 홈페이지의 학교공지사항, 학사공지, 장학공지, *생활관공지(선택)* 를 체크하여, 새 공지사항이 올라왔다면 `/알림설정` 명령어를 사용한 채널에 알림을 보냅니다.
   * 디스코드 서버의 관리자(혹은 메세지 관리 권한 소유자)가 지정한 시간에 제2학생회관과 테크노파크의 식단을 출력합니다.
 
 
@@ -30,13 +32,10 @@ discord.py를 이용하여 서울과학기술대학교의 식당의 메뉴와 �
 
 
 * 학교 생활 명령어
-  * `/2학`: 제2학생회관의 오늘 식단표(점심, 저녁)를 보여줍니다.
+  * `/2학 [날짜]`: 제2학생회관의 오늘 식단표(점심, 저녁)를 보여줍니다.
+    * `[날짜]` 옵션으로 내일의 제2학생회관 식단표를 확인 가능합니다.
   * `/테파`: 테크노파크의 이번 주 식단표를 이미지로 보여줍니다.
   * `/날씨`: 캠퍼스가 있는 공릉동의 날씨와 1 ~ 6시간 뒤 날씨 예보를 보여줍니다.
-
-
-* 계획 중
-  * ~~`/2학 [내일]`~~: 내일의 제2학생회관의 점심, 저녁 식단 메뉴를 출력합니다.
 
 
 ### Working Screenshots
@@ -67,25 +66,11 @@ $ git clone https://github.com/az0t0/discord-seoultechbot.git
 git을 사용해 위의 명령어로 이 Repository를 clone하여 최신 버전의 코드를 받거나, Releases에서 안정적인 버전의 코드를 내려받을 수 있습니다.
 ### Require Packages
 1. discord.py
-2. selenium
-3. requests
-4. beautifulsoup4
+2. requests
+3. beautifulsoup4
 
 해당 모듈은 `$ pip install -r discord-seoultechbot/techbot-packages.txt` 명령어로 한 번에 설치 가능합니다.
 
-### Internet Browser
-이 봇은 Selenium을 사용하므로 Web Driver를 요구합니다. 이 코드의 경우 Firefox와 이 브라우저에 쓰이는 엔진인 Gecko를 사용합니다.
-다른 브라우저 사용 시 그에 맞는 버전의 Web Driver를 로걸 저장소의 src와 같은 위치에 다운로드하고, `menucrawler.py`의 아래 부분을 알맞게 수정하시면 됩니다.
-```python 
-...
-from selenium.webdriver.firefox.options import Options
-...
-def load_browser(url):
-    options = Options()
-    options.headless = True
-    driver = webdriver.Firefox(options=options)
-    ...
-```
 
 ### Token
 Discord 봇을 만들기 위해 Discord 계정, [Discord Developers Portal](https://discord.com/developers/)의 Applications > 내 앱 > Bot에서 모든 Intents 옵션과 토큰이 필요합니다.
@@ -131,7 +116,7 @@ $ nohup python3 -u discordbot.py > discordbot.log 2>&1 &
 ### Repository 내
 * `discordbot.py`: Discord 봇의 동작에 필요한 핵심적인 코드입니다.
 * `server_settings.py`: SQLite3을 이용하여 각 서버에서 설정한 알림 시간을 저장 및 수정하는 코드입니다.
-* `menucrawler.py`: SQLite3과 Selenium을 이용하여 학교 홈페이지에서 식단을 크롤링하고 데이터베이스에 저장, 불러오는 코드입니다.
+* `menucrawler.py`: SQLite3과 requests, BeautifulSoup을 이용하여 학교/서울테크노파크 홈페이지에서 식단을 크롤링하고 데이터베이스에 저장, 불러오는 코드입니다.
 * `noticecrawler.py`: SQLite3과 requests, BeautifulSoup을 이용하여 학교 공지사항과 일정을 크롤링하고 데이터베이스에 저장, 불러오는 코드입니다.
 * `weather.py`: 정부의 오픈 API와 requests를 이용하여 캠퍼스의 날씨 예보를 불러오는 코드입니다.
 

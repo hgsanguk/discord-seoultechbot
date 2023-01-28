@@ -44,10 +44,14 @@ async def on_ready():
     food_crawling.start()
     notice_crawling.start()
     food_notification.start()
+    schedule_notification.start()
     change_status.start()
+
+    # 봇 상태 표시
     global status
     status = cycle(['도움말: /도움', f'{BOT_VERSION}', f'{len(bot.guilds)}개의 서버와 함께'])
 
+    # 알림 한꺼번에 보내지 않도록 미리 알림을 담음
     noticecrawler.get_notice('notice', 'University')
     noticecrawler.get_notice('matters', 'Affairs')
     noticecrawler.get_notice('janghak', 'Scholarship')
@@ -70,12 +74,22 @@ async def on_guild_join(guild):
 
 # 여기서부터 봇 명령어 코드입니다.
 
-@tree.command(name='2학', description='제2학생회관의 오늘 식단표를 보여줍니다.')
-async def _2학(interaction):
+@tree.command(name='2학', description='제2학생회관의 오늘 식단표를 보여줍니다. 옵션으로 내일의 식단표를 볼 수 있습니다.')
+@app_commands.choices(날짜=[app_commands.Choice(name='내일', value=1)])
+@app_commands.describe(날짜='보고 싶은 식단표의 날짜를 선택합니다.')
+async def _2학(interaction, 날짜: app_commands.Choice[int] = 0):
     try:
-        today = datetime.datetime.now()
-        day_str = '{today.month}월 {today.day}일 식단표'.format(today=today)
-        food_data = menucrawler.get_sc2_menu(int(today.strftime('%y%m%d')))
+        day = datetime.datetime.now()
+        if 날짜 != 0:
+            day += datetime.timedelta(days=날짜.value)
+            if day.weekday() >= 5:
+                raise IndexError
+            try:
+                menucrawler.get_sc2_menu(int(day.strftime('%y%m%d')))
+            except IndexError:
+                menucrawler.student_cafeteria_2(tomorrow=True)
+        day_str = '{today.month}월 {today.day}일 식단표'.format(today=day)
+        food_data = menucrawler.get_sc2_menu(int(day.strftime('%y%m%d')))
         embed = discord.Embed(title="제2학생회관", description=day_str, color=0x73BF1F)
         embed.add_field(name=f"점심: {food_data[0]} `{food_data[1]}`", value=f"{food_data[2]}", inline=False)
         if food_data[3] != '간단 snack':

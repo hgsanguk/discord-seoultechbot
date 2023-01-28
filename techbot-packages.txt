@@ -1,4 +1,3 @@
 discord.py
-selenium
 requests
 beautifulsoup4
