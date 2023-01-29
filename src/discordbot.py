@@ -91,9 +91,9 @@ async def _2학(interaction, 날짜: app_commands.Choice[int] = 0):
                 menucrawler.get_sc2_menu(int(day.strftime('%y%m%d')))
             except IndexError:
                 menucrawler.student_cafeteria_2(tomorrow=True)
-        day_str = '{today.month}월 {today.day}일 식단'.format(today=day)
+        date_str = '{today.month}월 {today.day}일 식단'.format(today=day)
         food_data = menucrawler.get_sc2_menu(int(day.strftime('%y%m%d')))
-        embed = discord.Embed(title="제2학생회관", description=day_str, color=0x73BF1F)
+        embed = discord.Embed(title="제2학생회관", description=date_str, color=0x73BF1F)
         embed.add_field(name=f"점심: {food_data[0]} `{food_data[1]}`", value=f"{food_data[2]}", inline=False)
         if food_data[3] != '간단 snack':
             embed.add_field(name=f"점심: {food_data[3]} `{food_data[4]}`", value=f"{food_data[5]}", inline=False)
@@ -362,7 +362,7 @@ async def food_notification():
 async def schedule_notification():
     now = datetime.datetime.now()
     schedule = noticecrawler.get_univ_schedule()
-    schedule_embed = discord.Embed(title='오늘의 일정', description='오늘 시작하거나 끝나는 일정입니다.', color=0x427EE2)
+    schedule_embed = discord.Embed(title='오늘의 일정', description='오늘 시작하거나 끝나는 학사일정입니다.', color=0x427EE2)
     channels = server_bot_settings.get_channel_all()
     if len(schedule) > 0:
         for row in schedule:
@@ -372,15 +372,16 @@ async def schedule_notification():
                 schedule_embed.add_field(name=task, value=date, inline=False)
             else:
                 schedule_embed.add_field(name=row, value=now.strftime('%Y.%m.%d'), inline=False)
-    if len(channels) > 0:
-        print(f'{now}: 알림 설정한 서버들을 대상으로 오늘의 일정 알림을 전송합니다.')
-        for channel_id in channels:
-            try:
-                channel = bot.get_channel(channel_id[0])
-                await channel.send(embed=schedule_embed)
-            except Exception as e:
-                print(f'{datetime.datetime.now()}: {channel_id[0]} 채널에 알림을 보낼 수 없습니다. 예외명: {e}')
-                continue
+
+        if len(channels) > 0:
+            print(f'{now}: 알림 설정한 서버들을 대상으로 오늘의 학사일정 알림을 전송합니다.')
+            for channel_id in channels:
+                try:
+                    channel = bot.get_channel(channel_id[0])
+                    await channel.send(embed=schedule_embed)
+                except Exception as e:
+                    print(f'{datetime.datetime.now()}: {channel_id[0]} 채널에 알림을 보낼 수 없습니다. 예외명: {e}')
+                    continue
 
 
 @tasks.loop(seconds=3)

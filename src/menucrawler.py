@@ -54,7 +54,10 @@ def student_cafeteria_2(tomorrow=False):
             cur.execute('DELETE FROM Student_Cafeteria_2 WHERE year_month_date = (SELECT min(year_month_date) FROM Student_Cafeteria_2)')
             count -= 1
     except IndexError:
-        print(f'{datetime.datetime.now()}: 크롤링 실패. 다음 주기에 다시 시도합니다. ({basedate}의 식단표 없음)')
+        if tomorrow:
+            print(f'{datetime.datetime.now()}: 크롤링 실패. (내일의 식단 등록 안 됨)')
+        else:
+            print(f'{datetime.datetime.now()}: 크롤링 실패. 다음 주기에 다시 시도합니다. (오늘의 식단 등록 안 됨)')
     except requests.ConnectTimeout:
         print(f'{datetime.datetime.now()}: 크롤링 실패. 다음 주기에 다시 시도합니다. (학교 홈페이지 응답 없음)')
 
