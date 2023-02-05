@@ -15,7 +15,7 @@ def get_weather(token):
     params = {'serviceKey': token, 'dataType': 'JSON', 'numOfRows': '1000', 'base_date': basetime.strftime('%Y%m%d'),
               'base_time': basetime.strftime('%H') + '30', 'nx': '61', 'ny': '128'}
 
-    response = requests.get(url, params=params)
+    response = requests.get(url, params=params, timeout=20)
     items = response.json().get('response').get('body').get('items')
 
     data = [[], [], [], [], [], []]
@@ -70,4 +70,3 @@ def get_weather(token):
             data[i % 6][8] = item['fcstValue']
 
     return today, data
-

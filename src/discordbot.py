@@ -24,7 +24,7 @@ bot = discord.Client(intents=discord.Intents.all())
 tree = app_commands.CommandTree(bot)
 global status
 CRAWLING_PERIOD = 1
-BOT_VERSION = 'v1.2'
+BOT_VERSION = 'v1.2.1'
 food_notification_time = [datetime.time(hour=i, minute=0,
                                         tzinfo=datetime.timezone(datetime.timedelta(hours=9))) for i in range(9, 13)]
 notice_crawling_time = [datetime.time(hour=i, minute=30,
@@ -180,7 +180,7 @@ async def 날씨(interaction):
         embed.set_footer(text='기상청 초단기예보 조회 서비스 오픈 API를 이용한 것으로, 실제 기상상황과 차이가 있을 수 있습니다.')
 
         await interaction.followup.send(embed=embed)
-    except weather.requests.ConnectTimeout:
+    except weather.requests.exceptions.Timeout:
         await interaction.followup.send('날씨를 불러오는 중 문제가 발생했습니다. 다시 시도해주세요.')
 
 
