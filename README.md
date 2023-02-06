@@ -45,7 +45,7 @@ discord.py를 이용하여 서울과학기술대학교의 식당의 메뉴와 �
 ![공지사항 자동알림](https://user-images.githubusercontent.com/113516890/210235400-d9f9caa9-1e2e-4f36-a309-ae18b73eb85c.png)
 
 #### 일정 알림
-사진 준비 중
+![오늘의 일정 자동 알림](https://user-images.githubusercontent.com/113516890/217039793-aaa4d150-f5fc-4881-af2c-e1735adcc5a0.png)
 
 #### `/2학`, `/테파` 명령어 사용
 ![/테파 명령어 사용](https://user-images.githubusercontent.com/113516890/210235490-47ab2ff2-5b1c-437c-9df0-8c69d29d4b4c.png)
