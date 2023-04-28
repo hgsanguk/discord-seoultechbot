@@ -1,7 +1,0 @@
-{
-    "config": {
-        "crawling_period": "1",
-        "discord_token": "",
-        "weather_openapi_token": ""
-    }
-}
