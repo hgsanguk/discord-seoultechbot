@@ -1,5 +1,6 @@
 # venv directory
 /venv/
+.venv
 
 # WebDriver Files
 /src/*driver*
@@ -14,3 +15,6 @@
 
 # Tokens
 /src/token
+
+# IDE Files
+/.idea
