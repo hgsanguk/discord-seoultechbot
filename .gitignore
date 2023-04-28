@@ -1,5 +1,9 @@
 # venv directory
-/venv/
+/venv
+/.venv
+
+# IDE
+/.idea
 
 # WebDriver Files
 /src/*driver*
