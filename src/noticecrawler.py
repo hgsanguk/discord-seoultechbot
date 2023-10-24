@@ -34,7 +34,7 @@ def get_notice(board_name, table_name):
             continue
     cur.execute('SELECT count(board_index) FROM ' + table_name)
     count = cur.fetchall()[0][0]
-    while count > 200:
+    while count > 2000:
         cur.execute('DELETE FROM ' + table_name + ' WHERE board_index = (SELECT min(board_index) FROM ' + table_name + ')')
         count -= 1
     return new_notice
@@ -62,7 +62,7 @@ def get_domi_notice():
             continue
     cur.execute('SELECT count(board_index) FROM Dormitory')
     count = cur.fetchall()[0][0]
-    while count > 100:
+    while count > 1000:
         cur.execute('DELETE FROM Dormitory WHERE board_index = (SELECT min(board_index) FROM Dormitory)')
         count -= 1
     return new_notice
