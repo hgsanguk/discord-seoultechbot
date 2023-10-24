@@ -24,7 +24,7 @@ bot = discord.Client(intents=discord.Intents.all())
 tree = app_commands.CommandTree(bot)
 global status
 CRAWLING_PERIOD = 1
-BOT_VERSION = 'v1.2.1'
+BOT_VERSION = 'v1.2.2'
 food_notification_time = [datetime.time(hour=i, minute=0,
                                         tzinfo=datetime.timezone(datetime.timedelta(hours=9))) for i in range(9, 13)]
 notice_crawling_time = [datetime.time(hour=i, minute=30,
