@@ -17,4 +17,4 @@
 /src/*.log
 
 # Tokens
-/src/token
+config.json
