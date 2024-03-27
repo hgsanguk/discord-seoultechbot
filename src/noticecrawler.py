@@ -2,7 +2,9 @@ import sqlite3
 import requests
 import datetime
 from bs4 import BeautifulSoup
+import urllib3
 
+urllib3.disable_warnings()
 notice_db = sqlite3.connect("notice.db", isolation_level=None)
 cur = notice_db.cursor()
 
@@ -41,7 +43,7 @@ def get_notice(board_name, table_name):
 
 
 def get_domi_notice():
-    response = requests.get('https://domi.seoultech.ac.kr/do/notice/')
+    response = requests.get('https://domi.seoultech.ac.kr/do/notice/', verify=False)
     parser = BeautifulSoup(response.text, "html.parser")
     rows = parser.select('.list_3 > li')
     new_notice = []
@@ -51,7 +53,7 @@ def get_domi_notice():
         bidx = int(url.split('&')[2].strip('bidx='))
         try:
             cur.execute('INSERT INTO Dormitory VALUES(?)', (bidx,))
-            response = requests.get('https://domi.seoultech.ac.kr/do/notice/' + url)
+            response = requests.get('https://domi.seoultech.ac.kr/do/notice/' + url, verify=False)
             parser = BeautifulSoup(response.text, "html.parser")
             try:
                 author = parser.select('.date > span:nth-child(2) > font:nth-child(1)')[0].text
