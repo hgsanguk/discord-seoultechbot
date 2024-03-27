@@ -1,18 +1,26 @@
 import logging
+from datetime import datetime
 
-def setup(name, level=logging.INFO, log_file='seoultechbot_discord.log'):
-    logger = logging.getLogger(name)
 
-    # 봇이 디버그 모드일 경우 로깅 레벨을 디버그 모드로 설정
-    if level == "DEBUG":
-        logger.setLevel(logging.DEBUG)
-    else:
-        logger.setLevel(logging.INFO)
+class Logger:
+    # 클래스 첫 호출에 로그 파일 이름 지정
+    filename = "seoultechbot_discord_" + datetime.now().strftime("%Y%m%d-%H%M%S") + ".log"
 
-    handler = logging.FileHandler(log_file, encoding='utf-8')
-    formatter = logging.Formatter('[%(asctime)s][%(name)s] - [%(levelname)s] %(message)s')
+    def __init__(self, level=logging.INFO):
+        # 로그 레벨 지정(기본: INFO)
+        if level == "DEBUG":
+            self.level = logging.DEBUG
+        else:
+            self.level = logging.INFO
 
-    handler.setFormatter(formatter)
-    logger.addHandler(handler)
+        self.formatter = logging.Formatter('[%(asctime)s][%(name)s] - [%(levelname)s] %(message)s')
+        self.handler = logging.FileHandler(self.filename, encoding='utf-8')
+        self.handler.setFormatter(self.formatter)
 
-    return logger
+    # 로거 설정 및 반환
+    def setup(self, name):
+        logger = logging.getLogger(name)
+        logger.setLevel(self.level)
+        logger.addHandler(self.handler)
+
+        return logger

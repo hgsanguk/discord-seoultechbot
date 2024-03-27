@@ -15,26 +15,25 @@ DISCORD_BOT_TOKEN = os.getenv("STBOT_DISCORD_BOT_TOKEN")
 WEATHER_API_TOKEN = os.getenv("STBOT_WEATHER_API_TOKEN")
 PROGRAM_LEVEL = os.getenv("STBOT_PROGRAM_LEVEL", "RELEASE")  # 프로그램 모드
 CRAWLING_PERIOD = os.getenv("STBOT_CRAWLING_PERIOD", 60)     # 크롤링 주기(초 단위)
-DB_MODE = os.getenv("STBOT_DB_MODE", "SQLITE")               # DBMS 설정(SQLITE, MYSQL)
+DB_MODE = os.getenv("STBOT_DB", "SQLITE")                    # DBMS 설정(SQLITE, MYSQL)
 
-# 로거 가져오기
-import logger
-logger = logger.setup('bot',
-                      PROGRAM_LEVEL,
-                      "seoultechbot_discord_" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S") + ".log")
+# 로그 생성하기
+from logger import Logger
+logger = Logger(PROGRAM_LEVEL)
+initial_logger = logger.setup('bot')
 
 # 봇 토큰이 없을 경우
 if not DISCORD_BOT_TOKEN:
-    logger.critical('디스코드 봇 토큰을 입력하지 않았습니다. 봇을 종료합니다.')
+    initial_logger.critical('디스코드 봇 토큰을 입력하지 않았습니다. 봇을 종료합니다.')
     exit(-1)
 else:
-    logger.info('디스코드 봇 토큰(앞 10자리): ' + DISCORD_BOT_TOKEN[0:10])
+    initial_logger.info('디스코드 봇 토큰(앞 10자리): ' + DISCORD_BOT_TOKEN[0:10])
 
 # 날씨 토큰이 없을 경우
 if not WEATHER_API_TOKEN:
-    logger.warn('오픈 API 기상청 단기예보 조회서비스 토큰을 입력하지 않았습니다. 봇의 날씨 기능이 비활성화 됩니다.')
+    initial_logger.warn('오픈 API 기상청 단기예보 조회서비스 토큰을 입력하지 않았습니다. 봇의 날씨 기능이 비활성화 됩니다.')
 else:
-    logger.info('오픈 API 기상청 단기예보 조회서비스 토큰(앞 10자리): ' + WEATHER_API_TOKEN[0:10])
+    initial_logger.info('오픈 API 기상청 단기예보 조회서비스 토큰(앞 10자리): ' + WEATHER_API_TOKEN[0:10])
 
 # 봇 상태 메세지 상태 변수
 status = cycle(['도움말: /도움', f'{VERSION}', '봇 시작 중...'])
