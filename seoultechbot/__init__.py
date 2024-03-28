@@ -1,5 +1,8 @@
 # 모듈 불러올 때 초기화 되는 변수들
 
+# 하위 패키지 네임스페이스 설정
+from .dbconnector import DBConnector
+
 # 환경 변수 사용을 위해 필요
 import os
 
