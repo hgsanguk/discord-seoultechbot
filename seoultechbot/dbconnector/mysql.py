@@ -12,7 +12,7 @@ class MYSQLConnector(DBConnector):
     MYSQL_USER = os.getenv("STBOT_MYSQL_USER")
     MYSQL_PASSWORD = os.getenv("STBOT_MYSQL_PASSWORD")
 
-    super.config = {
+    config = {
         'host': MYSQL_HOST,
         'port': MYSQL_PORT,
         'user': MYSQL_USER,
@@ -23,7 +23,7 @@ class MYSQLConnector(DBConnector):
     def open_connection(self):
         """MySQL 데이터베이스 연결"""
         try:
-            self.conn = mysql.connector.connect(**super.config)
+            self.conn = mysql.connector.connect(**self.config)
             if self.conn.is_connected():
                 logger.info("MySQL DB(HOST: " + self.MYSQL_HOST + ":" + self.MYSQL_PORT +
                             ", NAME: " + self.MYSQL_DB + ")에 연결 완료")
