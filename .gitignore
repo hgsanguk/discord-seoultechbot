@@ -5,16 +5,8 @@
 # IDE
 /.idea
 
-# WebDriver Files
-/src/*driver*
-
 # DB Files
-/src/food.db
-/src/server_settings.db
-/src/notice.db
+*.db
 
 # TechBot logs
-/src/*.log
-
-# Tokens
-config.json
+*.log
