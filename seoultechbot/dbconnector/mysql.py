@@ -1,11 +1,10 @@
 import os
 import mysql.connector
 
-from seoultechbot import DBConnector
-from seoultechbot.dbconnector import logger
+from seoultechbot.dbconnector import DBConnector, logger
 
 
-class MYSQLConnector(DBConnector):
+class MySQLConnector(DBConnector):
     MYSQL_HOST = os.getenv("STBOT_MYSQL_HOST")
     MYSQL_PORT = os.getenv("STBOT_MYSQL_PORT", 3306)
     MYSQL_DB = os.getenv("STBOT_MYSQL_DB")
@@ -19,6 +18,9 @@ class MYSQLConnector(DBConnector):
         'password': MYSQL_PASSWORD,
         'database': MYSQL_DB
     }
+
+    def __init__(self):
+        self.conn = None
 
     def open_connection(self):
         """MySQL 데이터베이스 연결"""

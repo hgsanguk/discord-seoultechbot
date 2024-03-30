@@ -1,12 +1,14 @@
 # DB Connector
 import sqlite3
-from seoultechbot import DBConnector
-from seoultechbot.dbconnector import logger
+from seoultechbot.dbconnector import DBConnector, logger
 
 
 class SQLiteConnector(DBConnector):
-    config = 'seoultechbot_discord.db'
-    conn = None
+    config = '../../seoultechbot_discord.db'
+
+    def __init__(self):
+        self.conn = None
+        pass
 
     def open_connection(self):
         """SQLite 데이터베이스 연결"""

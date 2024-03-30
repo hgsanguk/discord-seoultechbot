@@ -1,8 +1,5 @@
 # 모듈 불러올 때 초기화 되는 변수들
 
-# 하위 패키지 네임스페이스 설정
-from .dbconnector import DBConnector
-
 # 환경 변수 사용을 위해 필요
 import os
 
@@ -21,22 +18,23 @@ CRAWLING_PERIOD = os.getenv("STBOT_CRAWLING_PERIOD", 60)     # 크롤링 주기(
 DB_MODE = os.getenv("STBOT_DB", "SQLITE")                    # DBMS 설정(SQLITE, MYSQL)
 
 # 로그 생성하기
-from logger import Logger
-logger = Logger(PROGRAM_LEVEL)
-initial_logger = logger.setup('bot')
+from seoultechbot.logger import Logger
+Logger.set_level(PROGRAM_LEVEL)
+logger = Logger.setup('name')
 
 # 봇 토큰이 없을 경우
 if not DISCORD_BOT_TOKEN:
-    initial_logger.critical('디스코드 봇 토큰을 입력하지 않았습니다. 봇을 종료합니다.')
+    logger.critical('디스코드 봇 토큰을 입력하지 않았습니다. 봇을 종료합니다.')
     exit(-1)
 else:
-    initial_logger.info('디스코드 봇 토큰(앞 10자리): ' + DISCORD_BOT_TOKEN[0:10])
+    logger.info('디스코드 봇 토큰(앞 10자리): ' + DISCORD_BOT_TOKEN[0:10])
 
 # 날씨 토큰이 없을 경우
 if not WEATHER_API_TOKEN:
-    initial_logger.warn('오픈 API 기상청 단기예보 조회서비스 토큰을 입력하지 않았습니다. 봇의 날씨 기능이 비활성화 됩니다.')
+    logger.warn('오픈 API 기상청 단기예보 조회서비스 토큰을 입력하지 않았습니다. 봇의 날씨 기능이 비활성화 됩니다.')
 else:
-    initial_logger.info('오픈 API 기상청 단기예보 조회서비스 토큰(앞 10자리): ' + WEATHER_API_TOKEN[0:10])
+    logger.info('오픈 API 기상청 단기예보 조회서비스 토큰(앞 10자리): ' + WEATHER_API_TOKEN[0:10])
+
 
 # 봇 상태 메세지 상태 변수
 status = cycle(['도움말: /도움', f'{VERSION}', '봇 시작 중...'])

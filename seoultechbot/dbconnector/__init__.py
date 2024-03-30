@@ -3,8 +3,16 @@ from abc import ABC, abstractmethod
 
 # 로거 가져오기
 import seoultechbot
-logger = seoultechbot.logger.setup('db-connector')
+from seoultechbot.dbconnector.mysql import MySQLConnector
+from seoultechbot.dbconnector.sqlite import SQLiteConnector
 
+logger = seoultechbot.Logger.setup('db-connector')
+
+# DB Connector 선택
+if seoultechbot.DB_MODE == "MYSQL" or "MARIADB":
+    dbconnector = MySQLConnector()
+else:
+    dbconnector = SQLiteConnector()
 
 class DBConnector(ABC):
     @abstractmethod
