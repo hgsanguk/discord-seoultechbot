@@ -6,7 +6,8 @@ from datetime import datetime
 class Logger:
     """
     봇의 작동 로그를 기록하기 위한 클래스입니다.
-    폴더의 최상단, `run.py`와 같은 위치의 디렉토리에 `seoultechbot_discord.log`에 로그가 기록됩니다. 또한 30일마다 새 파일로 갱신되며 이전 파일은
+    폴더의 최상단, `run.py`와 같은 위치의 디렉토리에 `seoultechbot_discord.log`에 로그가 기록됩니다.\n
+    30일마다 로그 파일이 새 파일로 갱신되며 이전 파일은 `seoultechbot_discord.log.%Y%m%d(갱신일)` 형식으로 저장됩니다.
     """
 
     # 클래스 첫 호출에 로그 파일 이름 지정

@@ -51,7 +51,7 @@ async def fetch_all():
                         # 게시물 제목 찾기
                         title = row.find(class_='tit dn2') or row.find('div')
                         if not title:
-                            logger.warn(f"대표 홈페이지의 {board_name} 게시판에서 예상한 구조와 다른 구조의 게시물을 감지: 제목 element select 실패")
+                            logger.warning(f"대표 홈페이지의 {board_name} 게시판에서 예상한 구조와 다른 구조의 게시물을 감지: 제목 element select 실패")
                             continue
 
                         title_text = title.getText(strip=True)
@@ -65,7 +65,7 @@ async def fetch_all():
                         notice.append([notice_num, board_num, title_text, author])
                         logger.debug(f"대표 홈페이지의 {board_name} 게시판에서 {board_num}번 게시물 스크래핑")
                     except AttributeError as e:
-                        logger.warn(f"대표 홈페이지의 {board_name} 게시판에서 예상한 구조와 다른 구조의 게시물을 감지: {e}")
+                        logger.warning(f"대표 홈페이지의 {board_name} 게시판에서 예상한 구조와 다른 구조의 게시물을 감지: {e}")
                         continue
                 logger.info(f"대표 홈페이지의 {board_name} 게시판 스크래핑 완료")
                 return notice

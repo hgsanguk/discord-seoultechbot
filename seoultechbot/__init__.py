@@ -25,7 +25,7 @@ logger = Logger.setup('seoultechbot')
 
 # 스크랩하는 주기가 너무 짧을 경우 경고
 if SCRAP_PERIOD < 60:
-    logger.warn("스크랩 주기가 60초 미만입니다. 봇이 원활하게 작동하지 않거나, 학교 홈페이지가 봇의 스크래핑을 거부할 가능성이 있습니다.")
+    logger.warning("스크랩 주기가 60초 미만입니다. 봇이 원활하게 작동하지 않거나, 학교 홈페이지가 봇의 스크래핑을 거부할 가능성이 있습니다.")
 
 # 봇 토큰이 없을 경우
 if not DISCORD_BOT_TOKEN:
@@ -37,7 +37,7 @@ else:
 
 # 날씨 토큰이 없을 경우
 if not WEATHER_API_TOKEN:
-    logger.warn('오픈 API 기상청 단기예보 조회서비스 토큰을 입력하지 않았습니다. 봇의 날씨 기능이 비활성화 됩니다.')
+    logger.warning('오픈 API 기상청 단기예보 조회서비스 토큰을 입력하지 않았습니다. 봇의 날씨 기능이 비활성화 됩니다.')
 else:
     logger.info('오픈 API 기상청 단기예보 조회서비스 토큰(앞 10자리): ' + WEATHER_API_TOKEN[0:10])
 
