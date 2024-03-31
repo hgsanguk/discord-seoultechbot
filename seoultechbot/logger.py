@@ -16,7 +16,7 @@ class Logger:
     handler.setFormatter(formatter)
 
     @staticmethod
-    def set_level(level):
+    def set_level(level: str):
         """
         로깅 레벨을 설정합니다.
         :param level: 로깅 레벨을 str 형식으로 받아 로깅 레벨을 설정합니다. `level='DEBUG'` 는 DEBUG로, 이외의 경우엔 INFO로 설정됩니다.
@@ -30,7 +30,7 @@ class Logger:
 
     # 로거 설정 및 반환
     @staticmethod
-    def setup(name):
+    def setup(name: str):
         """
         고정된 형식에 따른 logger를 return하는 method입니다.
 

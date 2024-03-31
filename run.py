@@ -9,7 +9,7 @@ from discord.ext import tasks
 # 자체 라이브러리
 import seoultechbot
 
-bot = discord.Client(intents=discord.Intents.all())
+bot = discord.Client(intents=discord.Intents.default())
 tree = app_commands.CommandTree(bot)
 
 # 봇 첫 실행시 첫 이벤트
@@ -17,7 +17,7 @@ tree = app_commands.CommandTree(bot)
 async def on_ready():
     await bot.change_presence(status=discord.Status.online)
     await tree.sync()
-    seoultechbot.logger.info('봇 실행 완료.')
+    seoultechbot.logger.info('봇 실행 완료')
 
 
 @tasks.loop(seconds=3)

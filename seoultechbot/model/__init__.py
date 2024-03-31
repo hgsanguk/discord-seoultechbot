@@ -1,5 +1,5 @@
 """
-봇의 데이터베이스 모델을 관리하는 패키지입니다. sqlalchemy ORM을 사용하였습니다.
+sqlalchemy ORM을 사용하여 봇의 데이터베이스 모델을 관리하는 패키지입니다.
 """
 import os
 import sys
@@ -24,15 +24,15 @@ PASSWORD = os.getenv("STBOT_DB_PASSWORD")
 if seoultechbot.DB_TYPE == "MYSQL" or "MARIADB":
     # MySQL 혹은 MariaDB
     try:
-        conn_str = 'mysql+mysqldb://' + USER + ':' + PASSWORD + '@' + HOST + ':' + str(PORT) + '/' + NAME
+        conn_str = f"mysql+mysqldb://{USER}:{PASSWORD}@{HOST}:{PORT}/{NAME}"
         engine = create_engine(conn_str)
-        logger.debug(conn_str + "에 연결 중...")
+        logger.debug(f"{conn_str}에 연결 중...")
         engine.connect()
-        logger.info(seoultechbot.DB_TYPE + "에 연결 완료")
+        logger.info(f"{seoultechbot.DB_TYPE}에 연결 완료")
     except SQLAlchemyError as e:
         engine = None
-        logger.error(seoultechbot.DB_TYPE + "에 연결 도중 오류 발생: " + str(e))
-        sys.exit(seoultechbot.DB_TYPE + "에 연결 도중 오류 발생하여 봇을 종료합니다. 입력한 정보가 올바른지 확인한 후 다시 시도해주세요.")
+        logger.error(f"{seoultechbot.DB_TYPE}에 연결 도중 오류 발생: " + str(e))
+        sys.exit(f"{seoultechbot.DB_TYPE}에 연결 도중 오류 발생하여 봇을 종료합니다. 입력한 정보가 올바른지 확인한 후 다시 시도해주세요.")
 else:
     # SQLite
     engine = create_engine('sqlite://../../seoultechbot-discord.db')
