@@ -31,7 +31,7 @@ if seoultechbot.DB_TYPE == "MYSQL" or "MARIADB":
         logger.info(f"{seoultechbot.DB_TYPE}에 연결 완료")
     except SQLAlchemyError as e:
         engine = None
-        logger.error(f"{seoultechbot.DB_TYPE}에 연결 도중 오류 발생: " + str(e))
+        logger.error(f"{seoultechbot.DB_TYPE}에 연결 도중 오류 발생: {e}")
         sys.exit(f"{seoultechbot.DB_TYPE}에 연결 도중 오류 발생하여 봇을 종료합니다. 입력한 정보가 올바른지 확인한 후 다시 시도해주세요.")
 else:
     # SQLite
