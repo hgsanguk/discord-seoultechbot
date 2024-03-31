@@ -19,9 +19,9 @@ SCRAP_PERIOD = os.getenv("STBOT_SCRAP_PERIOD", 600)          # 스크래핑 주�
 DB_TYPE = os.getenv("STBOT_DB_TYPE", "SQLITE")               # DBMS 설정(SQLITE, MYSQL)
 
 # 로그 생성하기
-from seoultechbot.logger import Logger
+from .logger import Logger
 Logger.set_level(PROGRAM_LEVEL)
-logger = Logger.setup('init')
+logger = Logger.setup('seoultechbot')
 
 # 스크랩하는 주기가 너무 짧을 경우 경고
 if SCRAP_PERIOD < 60:
@@ -33,7 +33,7 @@ if not DISCORD_BOT_TOKEN:
     logger.critical(msg)
     sys.exit(msg)
 else:
-    logger.info('디스코드 봇 토큰(앞 10자리): ' + DISCORD_BOT_TOKEN[0:10])
+    logger.info('디스코드 봇 토큰 (앞 10자리): ' + DISCORD_BOT_TOKEN[0:10])
 
 # 날씨 토큰이 없을 경우
 if not WEATHER_API_TOKEN:
@@ -43,7 +43,7 @@ else:
 
 
 # 봇 상태 메세지 상태 변수
-status = cycle(['도움말: /도움', f'{VERSION}', '봇 시작 중...'])
+status = cycle(['봇 시작 중...'])
 
 # 크롤링 스케쥴러 설정
 food_notification_time = [datetime.time(hour=i, minute=0,

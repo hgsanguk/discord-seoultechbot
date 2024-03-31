@@ -12,7 +12,7 @@ from sqlalchemy.exc import SQLAlchemyError
 import seoultechbot
 
 # 로거 가져오기
-logger = seoultechbot.Logger.setup('db')
+logger = seoultechbot.Logger.setup('seoultechbot.model')
 
 HOST = os.getenv("STBOT_DB_HOST")
 PORT = os.getenv("STBOT_DB_PORT", 3306)

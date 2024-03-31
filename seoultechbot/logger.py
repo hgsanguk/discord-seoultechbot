@@ -1,19 +1,29 @@
 import logging
+from logging.handlers import TimedRotatingFileHandler
 from datetime import datetime
 
 
 class Logger:
     """
     봇의 작동 로그를 기록하기 위한 클래스입니다.
-    파일 이름과 형식은 지정되어 있으므로 초기화 과정 외의 런타임에서 변경하지 말 것을 권장합니다.
+    폴더의 최상단, `run.py`와 같은 위치의 디렉토리에 `seoultechbot_discord.log`에 로그가 기록됩니다. 또한 30일마다 새 파일로 갱신되며 이전 파일은
     """
 
     # 클래스 첫 호출에 로그 파일 이름 지정
-    filename = "seoultechbot_discord_" + datetime.now().strftime("%Y%m%d-%H%M%S") + ".log"
-    level = logging.INFO
-    formatter = logging.Formatter('[%(asctime)s][%(name)s] - [%(levelname)s] %(message)s')
-    handler = logging.FileHandler(filename, encoding='utf-8')
-    handler.setFormatter(formatter)
+    __filename = "seoultechbot_discord.log"
+    __level = logging.INFO
+    __formatter = logging.Formatter('[%(asctime)s][%(levelname)s] - [%(name)s] %(message)s')
+
+    __file_handler = TimedRotatingFileHandler(__filename, encoding='utf-8', when='D', interval=30, backupCount=6)
+    __file_handler.setFormatter(__formatter)
+    __file_handler.suffix = "%Y%m%d"
+
+    __stream_handler = logging.StreamHandler()
+    __stream_handler.setFormatter(__formatter)
+
+    __discord = logging.getLogger('discord')
+    __discord.addHandler(__file_handler)
+    __discord.addHandler(__stream_handler)
 
     @staticmethod
     def set_level(level: str):
@@ -22,6 +32,8 @@ class Logger:
         :param level: 로깅 레벨을 str 형식으로 받아 로깅 레벨을 설정합니다. `level='DEBUG'` 는 DEBUG로, 이외의 경우엔 INFO로 설정됩니다.
         :return:
         """
+        Logger.__discord.setLevel(level)
+
         # 상황에 맞춰서 로깅 레벨을 조절
         if level == "DEBUG" or "debug":
             Logger.level = logging.DEBUG
@@ -30,7 +42,7 @@ class Logger:
 
     # 로거 설정 및 반환
     @staticmethod
-    def setup(name: str):
+    def setup(name: str) -> logging.Logger:
         """
         고정된 형식에 따른 logger를 return하는 method입니다.
 
@@ -38,7 +50,8 @@ class Logger:
         :return: 파일 이름, 형식, 이름이 설정된 Logger 객체
         """
         logger = logging.getLogger(name)
-        logger.setLevel(Logger.level)
-        logger.addHandler(Logger.handler)
+        logger.setLevel(Logger.__level)
+        logger.addHandler(Logger.__file_handler)
+        logger.addHandler(Logger.__stream_handler)
 
         return logger

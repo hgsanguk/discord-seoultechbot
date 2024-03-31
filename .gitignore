@@ -10,3 +10,4 @@
 
 # TechBot logs
 *.log
+*.log.*

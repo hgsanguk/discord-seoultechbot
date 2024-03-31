@@ -3,5 +3,5 @@
 """
 # 로거 가져오기
 import seoultechbot
-logger = seoultechbot.Logger.setup('scrapper')
+logger = seoultechbot.Logger.setup('seoultechbot.scrapper')
 
