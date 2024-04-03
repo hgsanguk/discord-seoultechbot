@@ -11,7 +11,7 @@ import sys
 # 봇 상태 표시를 위한 모듈
 from itertools import cycle
 
-# Discord 상에서 봇의 작동을 위한 라이브러리
+# Discord 상에서 봇의 작동을 위한 패키지
 import discord
 from discord.ext import commands
 
@@ -59,11 +59,11 @@ class SeoulTechBot(commands.Bot):
         SeoulTechBot.__logger = Logger.setup('seoultechbot')
 
         # 봇 정보 로그에 표시
-        SeoulTechBot.__logger.info(f"SEOULTECHBOT PROJECT with Discord")
-        SeoulTechBot.__logger.info(f"Project Version {SeoulTechBot.VERSION}, BOT MODE: {SeoulTechBot.PROGRAM_LEVEL}")
+        SeoulTechBot.__logger.info(f"SEOULTECHBOT PROJECT - DISCORD BOT FOR SEOULTECH")
+        SeoulTechBot.__logger.info(f"PROJECT VERSION {SeoulTechBot.VERSION}, BOT MODE: {SeoulTechBot.PROGRAM_LEVEL}")
         SeoulTechBot.__logger.debug("디버그 모드가 활성화되었습니다.")
 
-        # 스크랩하는 주기가 너무 짧을 경우 경고
+        # 스크랩하는 주기가 너무 짧을 경우(60초 미만) 경고
         if SeoulTechBot.SCRAP_PERIOD < 60:
             SeoulTechBot.__logger.warning("스크랩 주기가 60초 미만입니다. 봇이 원활하게 작동하지 않거나, 학교 홈페이지가 봇의 스크래핑을 거부할 가능성이 있습니다.")
 
@@ -82,23 +82,38 @@ class SeoulTechBot(commands.Bot):
             SeoulTechBot.__logger.info('오픈 API 기상청 단기예보 조회서비스 토큰 (앞 10자리): ' + SeoulTechBot.WEATHER_API_TOKEN[0:10])
 
         # Bot 인스턴스 생성
-        super().__init__(command_prefix="/", intents=intents, help_command=None)
+        super().__init__(command_prefix="%", intents=intents, help_command=None)
 
-    async def on_ready(self):
+    async def setup_hook(self):
         """
-        봇 시작 시 봇 실행 파일들을 초기화합니다.
+        봇 실행 파일들을 초기화하고 봇의 명령어를 Discord 서버와 동기화 합니다.
         """
         SeoulTechBot.status = cycle(['봇 초기화 중...'])
         SeoulTechBot.__logger.info('봇 초기화 중...')
         await self.load_extension('seoultechbot.command.util')
         await self.load_extension('seoultechbot.event')
+
+        SeoulTechBot.__logger.info('Discord 서버와 봇의 명령어를 동기화 중...')
+        if SeoulTechBot.PROGRAM_LEVEL == "DEBUG":
+            debug_server = discord.Object(id=SeoulTechBot.DEBUG_SERVER_ID)
+            self.tree.copy_global_to(guild=debug_server)
+            synced = await self.tree.sync(guild=debug_server)
+        else:
+            synced = await self.tree.sync()
+        self.__logger.debug(f'동기화된 명령어: {synced}')
+        if len(synced) > 0:
+            SeoulTechBot.__logger.info('Discord 서버와 봇의 명령어 동기화 완료')
+        else:
+            SeoulTechBot.__logger.error('Discord 서버와 봇의 명령어 동기화 실패')
+
+    async def on_ready(self):
+        """
+        봇 Task를 초기화하고 실행 과정을 마무리 합니다.
+        """
         await self.load_extension('seoultechbot.task')
 
-        # SeoulTechBot.__logger.info('봇의 명령어를 Discord 서버와 동기화 중...')
-        synced = await self.tree.sync(guild=discord.Object(id=SeoulTechBot.DEBUG_SERVER_ID) if SeoulTechBot.PROGRAM_LEVEL == "DEBUG" else None)
-        self.__logger.debug(f'동기화된 명령어: {synced}')
         SeoulTechBot.status = cycle(['도움말: /도움', f'{SeoulTechBot.VERSION}', f'{len(self.guilds)}개의 서버와 함께'])
-        SeoulTechBot.__logger.info(f'{self.user.name} 시작 완료, {len(self.guilds)}개의 서버에서 봇 이용 중')
+        SeoulTechBot.__logger.info(f'{self.user.name} 실행 완료, {len(self.guilds)}개의 서버에서 봇 이용 중')
 
 
 def run():

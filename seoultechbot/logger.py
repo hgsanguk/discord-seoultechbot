@@ -32,13 +32,12 @@ class Logger:
         :param level: 로깅 레벨을 str 형식으로 받아 로깅 레벨을 설정합니다. `level='DEBUG'` 는 DEBUG로, 이외의 경우엔 INFO로 설정됩니다.
         :return:
         """
-        Logger.__discord.setLevel(level)
-
-        # 상황에 맞춰서 로깅 레벨을 조절
         if level == "DEBUG" or level == "debug":
             Logger.__level = logging.DEBUG
         else:
             Logger.__level = logging.INFO
+
+        Logger.__discord.setLevel(Logger.__level)
 
     # 로거 설정 및 반환
     @staticmethod

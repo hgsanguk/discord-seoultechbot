@@ -1,4 +1,4 @@
-# TechBot Project - Discord Bot for SEOULTECH
+# SeoulTechBot Project - Discord Bot for SEOULTECH
 ## Introduction
 discord.py를 이용하여 서울과학기술대학교의 식당의 메뉴와 공지사항을 자동으로 알려주고, 편의기능을 제공하는 Discord 봇 프로젝트 입니다.
 
@@ -9,15 +9,15 @@ discord.py를 이용하여 서울과학기술대학교의 식당의 메뉴와 �
 
 
 ## Release
-우측의 Releases를 클릭하여 이 프로젝트의 안정적인 버전을 사용한 '테크봇'을 초대할 수 있습니다.
-봇/코드 업데이트 시 변경사항은 Releases와 [테크봇 공식 서버](https://discord.gg/wRXRHB7mr6)의 `#봇-공지`채널을 통해 안내할 예정입니다.
+[링크]()를 클릭하여 이 프로젝트의 안정적인 버전을 사용한 '테크봇'을 초대할 수 있습니다.
+봇/코드 업데이트 시 변경사항은 Releases와 [SeoulTechBot 공식 서버](https://discord.gg/wRXRHB7mr6)의 `#봇-공지`채널을 통해 안내할 예정입니다.
 
 
 ### Features and Commands
 * 공지사항과 학식 자동 알림
-  * 매일 자정 `/알림설정` 명령어를 사용한 채널에 오늘의 학사일정을 보냅니다.
-  * 1시간 간격으로 학교 홈페이지의 학교공지사항, 학사공지, 장학공지, *생활관공지(선택)* 를 체크하여, 새 공지사항이 올라왔다면 `/알림설정` 명령어를 사용한 채널에 알림을 보냅니다.
-  * 디스코드 서버의 관리자(혹은 메세지 관리 권한 소유자)가 지정한 시간에 제2학생회관과 테크노파크의 식단을 출력합니다.
+  * 오늘의 학사일정이 있을 경우 매일 자정 `/알림설정` 명령어를 사용한 채널에 알림을 보냅니다.
+  * 봇 관리자가 지정한 간격으로 학교 홈페이지의 학교공지사항, 학사공지, 장학공지, 생활관공지를 스크래핑하며, 새 공지사항이 올라왔다면 `/알림설정` 명령어를 사용한 채널에 알림을 보냅니다.
+  * 디스코드 서버의 관리자(혹은 메세지 관리 권한 소유자)가 지정한 시간에 제2학생회관과 테크노파크의 식단 알림을 보냅니다.
 
 
 * 봇 조작 명령어
@@ -54,76 +54,42 @@ discord.py를 이용하여 서울과학기술대학교의 식당의 메뉴와 �
 ![/날씨 명령어 사용](https://user-images.githubusercontent.com/113516890/210235614-51a4259c-2635-4dae-b11b-030b99352573.png)
 
 ### Bug Report
-문제 발생 시 반드시 **해당 서버, 채널의 ID와 함께** issue를 작성하거나, [테크봇 공식 서버](https://discord.gg/wRXRHB7mr6)의 피드백 채널에서 문제를 알려주시기 바랍니다.
+문제 발생 시 반드시 **해당 서버, 채널의 ID와 함께** issue를 작성하거나, [SeoulTechBot 공식 서버](https://discord.gg/wRXRHB7mr6)의 피드백 채널에서 문제를 알려주시기 바랍니다.
 
 ---
 ## Getting Started with My Bot
-명령어는 git과 python3이 설치된 Linux 환경을 기준으로 설명했으며, 명령어를 제외한 나머지 설명은 Windows 환경에서도 동일합니다.
-### Get Code
+Discord 봇을 만들기 위해 Discord 계정, [Discord Developers Portal](https://discord.com/developers/)의 Applications > 내 앱 > Bot에서 토큰이 필요합니다.
+또한 `/날씨` 명령어를 활성화하려면 [오픈 API의 기상청 단기예보 조회서비스](https://www.data.go.kr/data/15084084/openapi.do)에서 인증키를 발급 받아야 합니다.
+
+[Discord Developers Portal](https://discord.com/developers/)의 Applications > 내 앱 > OAuth2에서 application_command와 bot을 체크 후 생성되는 링크를 통해 봇을 초대할 수 있습니다.
+
 ```shell
-$ git clone https://github.com/az0t0/discord-seoultechbot.git
+$ git clone https://github.com/hgsanguk/discord-seoultechbot.git
+$ cd discord-seoultechbot
 ```
-git을 사용해 위의 명령어로 이 Repository를 clone하여 최신 버전의 코드를 받거나, Releases에서 안정적인 버전의 코드를 내려받을 수 있습니다.
-### Require Packages
+git을 사용해 위의 명령어로 이 Repository를 clone하여 최신 버전의 코드를 받을 수 있습니다.
+
+### Run with Docker
+(작성 중)
+
+### Run Manually (with venv)
+(작성 중)
+SeoulTechBot 프로젝트는 Pyhton 3.8 버전 이상에서 작동하며, 필요한 패키지는 아래와 같습니다.
+
 1. discord.py
-2. requests
+2. aiohttp
 3. beautifulsoup4
+4. SQLAlchemy
+5. PyMySQL
 
-해당 모듈은 `$ pip install -r discord-seoultechbot/techbot-packages.txt` 명령어로 한 번에 설치 가능합니다.
+~~해당 모듈은 `$ pip install -r discord-seoultechbot/techbot-packages.txt` 명령어로 한 번에 설치 가능합니다.~~
 
 
-### Token
-Discord 봇을 만들기 위해 Discord 계정, [Discord Developers Portal](https://discord.com/developers/)의 Applications > 내 앱 > Bot에서 모든 Intents 옵션과 토큰이 필요합니다.
-또한 `/날씨` 명령어를 사용하려면 [오픈 API의 기상청 단기예보 조회서비스](https://www.data.go.kr/data/15084084/openapi.do)에서 인증키를 발급 받아야 합니다.
-
-토큰을 요구하는 부분은 아래와 같습니다.
-
-```python
-...
-import os
-...
-token_path = os.path.dirname(os.path.abspath(__file__)) + "/token"
-token_file = open(token_path, "r", encoding="utf-8").read().split()
-discord_bot_token = token_file[0]
-weather_api_token = token_file[1]
-...
-
-...
-@tree.command(description='...')
-async def 날씨(interaction):
-    try:
-        await interaction.response.defer()
-        date = weather.get_weather(weather_api_token)[0]
-        data = weather.get_weather(weather_api_token)[1]
-        ...
-...
-bot.run(discord_bot_token)
-```
-`discordbot.py`와 같은 경로에 `token` 파일(확장자 없음)을 만들어 첫번째 줄에는 **Discord 봇의 토큰**, 두번째 줄에는 오픈 API에서 발급받은 **일반 인증키**를 입력하면 됩니다.
-**토큰 노출 예방을 위해 `token` 파일이 `.gitignore`에 추가 되어있는지 반드시 확인하세요.**
-
-### Run
 ```shell
-$ cd discord-seoultechbot/src
-$ nohup python3 -u discordbot.py > discordbot.log 2>&1 &
+$ nohup python3 run.py &
 ```
-백그라운드에서 봇이 실행되며, `discordbot.log` 파일에서 로그를 확인해볼 수 있습니다.
-[Discord Developers Portal](https://discord.com/developers/)의 Applications > 내 앱 > OAuth2에서 bot 체크 후 생성되는 링크를 통해 봇을 초대할 수 있습니다.
+백그라운드에서 봇이 실행되며, `seoultechbot_discord.log` 파일에서 로그를 확인해볼 수 있습니다.
 
-
----
-## About Files
-### Repository 내
-* `discordbot.py`: Discord 봇의 동작에 필요한 핵심적인 코드입니다.
-* `server_settings.py`: SQLite3을 이용하여 각 서버에서 설정한 알림 시간을 저장 및 수정하는 코드입니다.
-* `menucrawler.py`: SQLite3과 requests, BeautifulSoup을 이용하여 학교/서울테크노파크 홈페이지에서 식단을 크롤링하고 데이터베이스에 저장, 불러오는 코드입니다.
-* `noticecrawler.py`: SQLite3과 requests, BeautifulSoup을 이용하여 학교 공지사항과 일정을 크롤링하고 데이터베이스에 저장, 불러오는 코드입니다.
-* `weather.py`: 정부의 오픈 API와 requests를 이용하여 캠퍼스의 날씨 예보를 불러오는 코드입니다.
-
-### Runtime
-* `food.db`: 학교 홈페이지에서 크롤링 한 식단을 저장하는 데이터베이스 파일입니다.
-* `notice.db`: 학교 공지사항의 게시글 번호를 저장하는 데이터베이스 파일입니다.
-* `server_settings.db`: 각 서버에서 설정한 알림 받을 채널의 ID를 저장하는 데이터베이스 파일입니다.
 
 ## License
 * 이 프로젝트의 라이센스는 GNU GPL 3.0이며, 자세한 내용은 `LICENSE`를 참고하시기 바랍니다.
