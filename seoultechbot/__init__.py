@@ -76,7 +76,6 @@ class SeoulTechBot(commands.Bot):
             SeoulTechBot.__logger.info('Discord 봇 토큰 (앞 10자리): ' + SeoulTechBot.DISCORD_BOT_TOKEN[0:10])
 
         # 날씨 토큰 확인
-
         if not SeoulTechBot.WEATHER_API_TOKEN:
             SeoulTechBot.__logger.warning('오픈 API 기상청 단기예보 조회서비스 토큰을 입력하지 않았습니다. 봇의 날씨 기능이 비활성화 됩니다.')
         else:
