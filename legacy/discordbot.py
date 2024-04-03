@@ -12,13 +12,11 @@ import menucrawler
 import noticecrawler
 import weather
 
-token_path = os.path.dirname(os.path.abspath(__file__)) + "/token"
-token_file = open(token_path, "r", encoding="utf-8").read().split()
-discord_bot_token = token_file[0]
-weather_api_token = token_file[1]
+DISCORD_BOT_TOKEN = os.getenv("STBOT_DISCORD_BOT_TOKEN")
+WEATHER_API_TOKEN = os.getenv("STBOT_WEATHER_API_TOKEN")
 
-print("Discord Bot Token: ", discord_bot_token)
-print("오픈 API 기상청 단기예보 조회서비스 Token: ", weather_api_token)
+print("Discord Bot Token: ", DISCORD_BOT_TOKEN)
+print("오픈 API 기상청 단기예보 조회서비스 Token: ", WEATHER_API_TOKEN)
 
 bot = discord.Client(intents=discord.Intents.all())
 tree = app_commands.CommandTree(bot)
@@ -121,8 +119,8 @@ async def 테파(interaction):
 async def 날씨(interaction):
     try:
         await interaction.response.defer()
-        date = weather.get_weather(weather_api_token)[0]
-        data = weather.get_weather(weather_api_token)[1]
+        date = weather.get_weather(WEATHER_API_TOKEN)[0]
+        data = weather.get_weather(WEATHER_API_TOKEN)[1]
 
         if 8 <= date.hour <= 16:
             color = 0x99CCFF
@@ -389,4 +387,4 @@ async def change_status():
     await bot.change_presence(activity=discord.Game(next(status)))
 
 
-bot.run(discord_bot_token)
+bot.run(DISCORD_BOT_TOKEN)
