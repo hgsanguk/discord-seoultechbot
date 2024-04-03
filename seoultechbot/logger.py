@@ -1,6 +1,5 @@
 import logging
 from logging.handlers import TimedRotatingFileHandler
-from datetime import datetime
 
 
 class Logger:
@@ -36,10 +35,10 @@ class Logger:
         Logger.__discord.setLevel(level)
 
         # 상황에 맞춰서 로깅 레벨을 조절
-        if level == "DEBUG" or "debug":
-            Logger.level = logging.DEBUG
+        if level == "DEBUG" or level == "debug":
+            Logger.__level = logging.DEBUG
         else:
-            Logger.level = logging.INFO
+            Logger.__level = logging.INFO
 
     # 로거 설정 및 반환
     @staticmethod
