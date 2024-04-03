@@ -2,7 +2,9 @@ import sqlite3
 import requests
 import datetime
 from bs4 import BeautifulSoup
+import urllib3
 
+urllib3.disable_warnings()
 notice_db = sqlite3.connect("notice.db", isolation_level=None)
 cur = notice_db.cursor()
 
@@ -34,14 +36,14 @@ def get_notice(board_name, table_name):
             continue
     cur.execute('SELECT count(board_index) FROM ' + table_name)
     count = cur.fetchall()[0][0]
-    while count > 200:
+    while count > 2000:
         cur.execute('DELETE FROM ' + table_name + ' WHERE board_index = (SELECT min(board_index) FROM ' + table_name + ')')
         count -= 1
     return new_notice
 
 
 def get_domi_notice():
-    response = requests.get('https://domi.seoultech.ac.kr/do/notice/')
+    response = requests.get('https://domi.seoultech.ac.kr/do/notice/', verify=False)
     parser = BeautifulSoup(response.text, "html.parser")
     rows = parser.select('.list_3 > li')
     new_notice = []
@@ -51,7 +53,7 @@ def get_domi_notice():
         bidx = int(url.split('&')[2].strip('bidx='))
         try:
             cur.execute('INSERT INTO Dormitory VALUES(?)', (bidx,))
-            response = requests.get('https://domi.seoultech.ac.kr/do/notice/' + url)
+            response = requests.get('https://domi.seoultech.ac.kr/do/notice/' + url, verify=False)
             parser = BeautifulSoup(response.text, "html.parser")
             try:
                 author = parser.select('.date > span:nth-child(2) > font:nth-child(1)')[0].text
@@ -62,7 +64,7 @@ def get_domi_notice():
             continue
     cur.execute('SELECT count(board_index) FROM Dormitory')
     count = cur.fetchall()[0][0]
-    while count > 100:
+    while count > 1000:
         cur.execute('DELETE FROM Dormitory WHERE board_index = (SELECT min(board_index) FROM Dormitory)')
         count -= 1
     return new_notice
