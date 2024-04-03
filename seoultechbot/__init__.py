@@ -53,7 +53,6 @@ class SeoulTechBot(commands.Bot):
         self.__weather_api_token = os.getenv("STBOT_WEATHER_API_TOKEN")
         self.__scrap_period = os.getenv("STBOT_SCRAP_PERIOD", 600)
         self.__debug_server_id = os.getenv("STBOT_DEBUG_SERVER_ID", None)
-        self.____logger = None
         
         # 자원 절약을 위해 필수적인 Intents만 허용합니다.
         intents = discord.Intents.none()
@@ -111,7 +110,7 @@ class SeoulTechBot(commands.Bot):
             synced = await self.tree.sync(guild=debug_server)
         else:
             synced = await self.tree.sync()
-        self.____logger.debug(f'동기화된 명령어: {synced}')
+        self.__logger.debug(f'동기화된 명령어: {synced}')
         if len(synced) > 0:
             self.__logger.info('Discord 서버와 봇의 명령어 동기화 완료')
         else:
