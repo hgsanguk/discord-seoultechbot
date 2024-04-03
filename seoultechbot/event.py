@@ -1,7 +1,8 @@
+import logging
 from itertools import cycle
 
 from discord.ext import commands
-from seoultechbot import Logger, SeoulTechBot
+from seoultechbot import SeoulTechBot
 
 
 class Event(commands.Cog):
@@ -10,7 +11,7 @@ class Event(commands.Cog):
     """
     def __init__(self, bot):
         self.__bot = bot
-        self.__logger = Logger.setup('seoultechbot.event')
+        self.__logger = logging.getLogger(__name__)
         self.__logger.debug(f'{__name__} 모듈 초기화 완료')
 
     @commands.Cog.listener()
@@ -26,7 +27,7 @@ class Event(commands.Cog):
                                    '`/도움` 명령어로 명령어의 목록을 확인하실 수 있습니다.')
                 break
         self.__logger.info(f'{guild.name}({guild.id}) 서버에서 {self.__bot.user.name} 추가')
-        SeoulTechBot.status = cycle(['도움말: /도움', f'{SeoulTechBot.VERSION}', f'{len(self.__bot.guilds)}개의 서버와 함께'])
+        SeoulTechBot.status = cycle(['도움말: /도움', f'{SeoulTechBot.get_version()}', f'{len(self.__bot.guilds)}개의 서버와 함께'])
         self.__logger.debug(f'봇의 상태 갱신 완료, {len(self.__bot.guilds)}개의 서버에서 봇 이용 중')
 
     @commands.Cog.listener()
@@ -37,7 +38,7 @@ class Event(commands.Cog):
         :param guild: 제거된 서버의 정보
         """
         self.__logger.info(f'{guild.name}({guild.id}) 서버에서 {self.__bot.user.name} 제거')
-        SeoulTechBot.status = cycle(['도움말: /도움', f'{SeoulTechBot.VERSION}', f'{len(self.__bot.guilds)}개의 서버와 함께'])
+        SeoulTechBot.status = cycle(['도움말: /도움', f'{SeoulTechBot.get_version()}', f'{len(self.__bot.guilds)}개의 서버와 함께'])
         self.__logger.debug(f'봇의 상태 갱신 완료, {len(self.__bot.guilds)}개의 서버에서 봇 이용 중')
 
 

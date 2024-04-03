@@ -1,9 +1,9 @@
-from itertools import cycle
+import logging
 
 import discord
 from discord.ext import commands, tasks
 
-from seoultechbot import SeoulTechBot, Logger
+from seoultechbot import SeoulTechBot
 
 
 class Task(commands.Cog):
@@ -12,9 +12,8 @@ class Task(commands.Cog):
     """
     def __init__(self, bot):
         self.__bot = bot
-        self.__logger = Logger.setup('seoultechbot.task')
+        self.__logger = logging.getLogger(__name__)
         self.__logger.debug(f'{__name__} 모듈 초기화 완료')
-        self.__status = cycle(['도움말: /도움', f'{SeoulTechBot.VERSION}', f'{len(self.__bot.guilds)}개의 서버와 함께'])
 
     async def cog_load(self):
         self.__logger.info('봇의 Task 시작')

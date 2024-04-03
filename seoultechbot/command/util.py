@@ -1,8 +1,8 @@
+import logging
+
 import discord
 from discord import app_commands
 from discord.ext import commands
-
-from seoultechbot import Logger
 
 
 class Util(commands.Cog):
@@ -10,7 +10,7 @@ class Util(commands.Cog):
     봇의 작동과 사용에 유용한 명령어를 모아놓은 클래스입니다.
     """
     def __init__(self, bot):
-        self.__logger = Logger.setup('seoultechbot.commmand.util')
+        self.__logger = logging.getLogger(__name__)
         self.__bot = bot
         self.__logger.debug(f'{__name__} 모듈 초기화 완료')
 
