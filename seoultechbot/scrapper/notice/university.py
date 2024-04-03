@@ -13,12 +13,15 @@ from urllib.parse import parse_qs, urlparse
 # scrapper 패키지의 로거 사용
 from seoultechbot.scrapper import logger
 
+# 기존에 만들어 놓은 Model 사용
+from seoultechbot.model.notice import University
+
 
 async def fetch_all():
     """
     학교 홈페이지의 여러 게시판에서 공지사항을 비동기적으로 가져옵니다.
 
-    :return: `list[list[int, int, str, str], ...]` - 대학공지사항, 학사공지, 장학공지, 기숙사공지의 첫 페이지의 [게시물 번호, 게시판 번호, 게시물 제목, 작성자]
+    :return: `list[University, University, University, University]` - 대학공지사항, 학사공지, 장학공지, 기숙사공지 첫 페이지에 있는 글의 정보가 담긴 :class:`seoultechbot.model.notice.Notice` 를 상속받은 :class:`University` 객체 리스트
     """
 
     async def fetch_university(session: ClientSession, board_name: str) -> list:
@@ -62,7 +65,8 @@ async def fetch_all():
                         url = row.find('a')['href']
                         notice_num = int(parse_qs(urlparse(url).query).get('bnum', None)[0])
                         board_num = int(parse_qs(urlparse(url).query).get('bidx', None)[0])
-                        notice.append([notice_num, board_num, title_text, author])
+                        # notice.append([notice_num, board_num, title_text, author])
+                        notice.append(University(notice_num, board_num, board_name, title_text, author))
                         logger.debug(f"대표 홈페이지의 {board_name} 게시판에서 {board_num}번 게시물 스크래핑")
                     except AttributeError as e:
                         logger.warning(f"대표 홈페이지의 {board_name} 게시판에서 예상한 구조와 다른 구조의 게시물을 감지: {e}")
