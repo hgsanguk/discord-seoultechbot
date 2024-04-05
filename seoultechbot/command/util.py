@@ -21,7 +21,7 @@ class Util(commands.Cog):
                               color=0x711E92)
         await interaction.response.send_message(embed=embed)
 
-    @app_commands.command(name='도움', description='테크봇의 명령어 목록과 설명을 보여줍니다.')
+    @app_commands.command(name='도움', description=f'봇의 명령어 목록과 설명을 보여줍니다.')
     async def help(self, interaction):
         self.__logger.info(f"{interaction.guild.name}({interaction.guild.id})의 {interaction.channel.name}({interaction.channel.id})에서 '/도움' 사용")
         embed = discord.Embed(title="봇 명령어 목록", color=0x711E92)
