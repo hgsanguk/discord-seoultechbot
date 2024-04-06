@@ -86,7 +86,7 @@ async def fetch_all():
 
     async def fetch_dormitory(session: ClientSession) -> list:
         """
-        `'https://domi.seoultech.ac.kr/do/notice/`\n
+        `'https://domi.seoultech.ac.kr/do/notice/'`\n
         위의 링크(기숙사 홈페이지 공지사항)의 첫 페이지를 비동기로 스크래핑 해 게시물 정보를 포함한 코루틴 객체를 반환합니다.
 
         :param session: HTTP GET할 aiohttp의 ClientSession 객체입니다.
