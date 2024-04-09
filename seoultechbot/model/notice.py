@@ -26,13 +26,6 @@ class Notice:
     # scrapped_time = Column(String, nullable=False)
     # content = Column(String)
 
-    def __init__(self, notice_num: int, board_num: int, board_name: str, title: str, author: str):
-        self.board_name = board_name
-        self.board_num = board_num
-        self.notice_num = notice_num
-        self.title = title
-        self.author = author
-
 
 class University(Notice, Base):
     """
