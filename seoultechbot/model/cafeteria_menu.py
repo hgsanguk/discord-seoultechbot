@@ -17,7 +17,7 @@ class SeoulTechnopark(Base):
 
     id = Column(Integer, primary_key=True)
     week = Column(Integer, unique=True)
-    title = Column(String, unique=True, nullable=False)
+    title = Column(String, nullable=False)
     image_url = Column(String, name="img_url", nullable=False)
 
 
@@ -27,19 +27,26 @@ class SecondStudentsUnionBuilding(Base):
     해당 코드 작성 기준 첫번째 메뉴, 두번째 메뉴까지만 판매하므로 최대 두 개의 메뉴까지 지원합니다.
 
     Attributes:
-        id: 데이터베이스에 id로 저장되는 Primary Key입니다. 별도의 용도는 없습니다. (int)
-        date: 해당 식단의 날짜입니다. 형식은 YYMMDD입니다. 해당 Attribute는 중복 저장을 막기위해 unique합니다. (int)
-        menuN_name: n번째 식단의 주 메뉴 이름입니다. (str)
-        menuN_side: n번째 식단의 반찬 이름들입니다. (str)
-        menuN_price: n번째 식단의 가격입니다. (str)
+        date: 해당 식단의 날짜로, 형식은 YYMMDD입니다. 데이터베이스에 id로 저장되는 Primary Key입니다. (int)
+        lunch_a_name: 점심 A 코너의 이름입니다. (str)
+        lunch_a_price: 점심 A 코너의 가격입니다. (str)
+        lunch_a_menu: 점심 A 코너의 메뉴입니다. (str)
+        lunch_b_name: 점심 B 코너의 이름입니다. (str)
+        lunch_b_price: 점심 B 코너의 가격입니다. (str)
+        lunch_b_menu: 점심 B 코너의 메뉴입니다. (str)
+        dinner_name: 저녁 코너의 이름입니다.
+        dinner_price: 저녁 코너의 가격입니다.
+        dinner_menu: 저녁 코너의 메뉴입니다.
     """
     __tablename__ = 'cafeteria_menu_su'
 
-    id = Column(Integer, primary_key=True)
     date = Column(Integer, unique=True)
-    menu1_name = Column(String, name="first_name")
-    menu1_side = Column(String, name="first_side")
-    menu1_price = Column(String, name="first_price")
-    menu2_name = Column(String, name="second_name")
-    menu2_side = Column(String, name="second_side")
-    menu2_price = Column(String, name="second_price")
+    lunch_a_name = Column(String, name="lunch_a_name")
+    lunch_a_price = Column(String, name="lunch_a_price")
+    lunch_a_menu = Column(String, name="lunch_a_menu")
+    lunch_b_name = Column(String, name="lunch_b_name")
+    lunch_b_price = Column(String, name="lunch_b_price")
+    lunch_b_menu = Column(String, name="lunch_b_menu")
+    dinner_name = Column(String, name="dinner_name")
+    dinner_price = Column(String, name="dinner_price")
+    dinner_menu = Column(String, name="dinner_menu")
