@@ -5,16 +5,14 @@ from seoultechbot.model import Base
 class Notice:
     """
     대학교의 알림을 처리하는데 사용하는 클래스입니다.
-    `board_name, title, author` 는 데이터베이스에 저장되지 않으며, 객체의 라이프사이클 동안만 정보를 보관하기 위해 사용합니다.
 
     Attributes:
         notice_num (int): 게시물의 고유 번호입니다. 데이터베이스에 id로 저장되는 Primary Key입니다.
         board_num (int): 게시물이 올라온 게시판 번호입니다.
 
-        board_name (str): 게시물이 올라온 게시판 이름입니다.
-        title (str): 게시물 제목입니다.
-        author (str): 게시물 작성자입니다.
-
+        # board_name (str): 게시물이 올라온 게시판 이름입니다.
+        # title (str): 게시물 제목입니다.
+        # author (str): 게시물 작성자입니다.
         # scrapped_time (str): 스크래핑 된 시간을 통해 추정한 게시물이 올라온 시각입니다.
         # content (str): 게시물 내용입니다.
     """
