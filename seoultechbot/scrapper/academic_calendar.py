@@ -1,6 +1,9 @@
 """
 대학교 학사 일정의 비동기 스크래핑에 관한 모듈입니다.
 """
+# 자세한 예외 발생 로그 출력을 위한 패키지
+import traceback
+
 # 비동기 스크래핑과 웹 페이지 파싱을 위한 패키지
 from datetime import datetime
 from aiohttp import ClientError, ClientSession, ClientTimeout
@@ -11,7 +14,7 @@ from bs4 import BeautifulSoup
 from seoultechbot.scrapper import logger
 
 
-async def fetch_calendar(target_date: datetime) -> list:
+async def fetch_academic_calendar(target_date: datetime) -> list:
     """
     `'https://eclass.seoultech.ac.kr/ilos/main/main_schedule_view.acl?viewDt=' + target_date.strftime('%Y%m%d')`\n
     위의 링크(학교 e-Class의 학사 일정)을 비동기로 스크래핑 해 학사 일정을 담은 리스트를 반환합니다.
@@ -43,4 +46,5 @@ async def fetch_calendar(target_date: datetime) -> list:
             logger.error(f"기숙사 홈페이지 요청 중 HTTP 에러 발생: {e}")
         except Exception as e:
             logger.error(f"기숙사 홈페이지에서 알 수 없는 오류 발생: {e}")
+            logger.error(traceback.format_exc())
         return []
