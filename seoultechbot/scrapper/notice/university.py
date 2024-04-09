@@ -1,15 +1,17 @@
 """
 대표 홈페이지와 기숙사 홈페이지의 공지사항을 스크래핑하는 비동기 메서드를 포함한 파일입니다.
 """
-# 비동기 스크래핑과 웹 페이지 파싱을 위한 패키지
-import asyncio
-
-from aiohttp import ClientError, ClientSession, ClientTimeout, TCPConnector
-from aiohttp.http_exceptions import HttpProcessingError
-from bs4 import BeautifulSoup
+# 자세한 예외 발생 로그 출력을 위한 패키지
+import traceback
 
 # 링크 Parameter 파싱을 위한 패키지
 from urllib.parse import parse_qs, urlparse
+
+# 비동기 스크래핑과 웹 페이지 파싱을 위한 패키지
+import asyncio
+from aiohttp import ClientError, ClientSession, ClientTimeout, TCPConnector
+from aiohttp.http_exceptions import HttpProcessingError
+from bs4 import BeautifulSoup
 
 # scrapper 패키지의 로거 사용
 from seoultechbot.scrapper import logger
@@ -21,6 +23,8 @@ async def fetch_all():
 
     :return: `dict` - 대학공지사항, 학사공지, 장학공지, 기숙사공지 첫 페이지에 있는 글의 정보가 담긴 dict의 리스트
     """
+    # 게시판 주소
+    board_list = ['notice', 'matters', 'janghak']  # , 'graduate', 'job']
 
     async def fetch_university(session: ClientSession, board_name: str) -> list:
         """
@@ -32,8 +36,6 @@ async def fetch_all():
         :param board_name: 게시판 이름으로, 대학교 대표 홈페이지 공지사항 링크의 제일 뒤에 들어갈 경로입니다.
         :return: `list[University]` - 게시물 번호, 게시판 번호, 게시물 제목, 작성자
         """
-
-        board_list = ['notice', 'matters', 'janghak', 'graduate', 'job']
         if not board_name in board_list:
             raise ValueError('잘못된 게시판 주소를 입력하였습니다.')
 
@@ -66,7 +68,8 @@ async def fetch_all():
                         board_num = int(parse_qs(urlparse(url).query).get('bidx', None)[0])
 
                         # 리스트에 게시물 정보 추가
-                        notice = {'notice_num': notice_num, 'board_num': board_num, 'title': title_text, 'author': author}
+                        notice = {'notice_num': notice_num, 'board_num': board_num, 'title': title_text,
+                                  'author': author}
                         notices.append(notice)
                         # logger.debug(f"대표 홈페이지의 {board_name} 게시판에서 {board_num}번 게시물 스크래핑")
                     except AttributeError as e:
@@ -80,6 +83,7 @@ async def fetch_all():
             logger.error(f"대표 홈페이지의 {board_name} 게시판에서 HTTP 에러 발생: {e}")
         except Exception as e:
             logger.error(f"대표 홈페이지의 {board_name} 게시판에서 알 수 없는 오류 발생: {e}")
+            logger.error(traceback.format_exc())
         return []
 
     async def fetch_dormitory(session: ClientSession) -> list:
@@ -126,14 +130,14 @@ async def fetch_all():
             logger.error(f"기숙사 홈페이지 요청 중 HTTP 에러 발생: {e}")
         except Exception as e:
             logger.error(f"기숙사 홈페이지에서 알 수 없는 오류 발생: {e}")
+            logger.error(traceback.format_exc())
         return []
 
     # 대학공지사항, 학사공지, 장학공지, 기숙사공지 스크래핑
     # 타임아웃을 10초로 설정
     # 기숙사 홈페이지의 SSL Verify 에러로 인해 HTTP 요청 시 SSL Verify 과정 임시로 비활성화
     async with ClientSession(timeout=ClientTimeout(total=10), connector=TCPConnector(ssl=False)) as session:
-        tasks = [fetch_university(session, 'notice'), fetch_university(session, 'matters'),
-                 fetch_university(session, 'janghak'), fetch_dormitory(session)]
-        results = await asyncio.gather(*tasks, return_exceptions=True)  # 예외가 발생해도 크래시 되지 않도록 설정
-        results_dict = {'notice': results[0], 'matters': results[1], 'janghak': results[2], 'dormitory': results[3]}
-        return results_dict
+        tasks = {board_name: fetch_university(session, board_name) for board_name in board_list}
+        tasks['dormitory'] = fetch_dormitory(session)
+        results = await asyncio.gather(*tasks.values(), return_exceptions=True)  # 예외가 발생해도 크래시 되지 않도록 설정
+        return dict(zip(tasks.keys(), results))  # 게시판 주소에 결과 매핑
