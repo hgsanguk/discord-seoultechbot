@@ -34,9 +34,9 @@ class SecondStudentsUnionBuilding(Base):
         lunch_b_name: 점심 B 코너의 이름입니다. (str)
         lunch_b_price: 점심 B 코너의 가격입니다. (str)
         lunch_b_menu: 점심 B 코너의 메뉴입니다. (str)
-        dinner_name: 저녁 코너의 이름입니다.
-        dinner_price: 저녁 코너의 가격입니다.
-        dinner_menu: 저녁 코너의 메뉴입니다.
+        dinner_name: 저녁 코너의 이름입니다. (str)
+        dinner_price: 저녁 코너의 가격입니다. (str)
+        dinner_menu: 저녁 코너의 메뉴입니다. (str)
     """
     __tablename__ = 'cafeteria_menu_su'
 

@@ -14,7 +14,7 @@ from bs4 import BeautifulSoup
 from seoultechbot.scrapper import logger
 
 
-async def fetch_academic_calendar(target_date: datetime) -> list:
+async def fetch(target_date: datetime) -> list:
     """
     `'https://eclass.seoultech.ac.kr/ilos/main/main_schedule_view.acl?viewDt=' + target_date.strftime('%Y%m%d')`\n
     위의 링크(학교 e-Class의 학사 일정)을 비동기로 스크래핑 해 학사 일정을 담은 리스트를 반환합니다.
@@ -41,10 +41,10 @@ async def fetch_academic_calendar(target_date: datetime) -> list:
                 logger.info(f"{date}의 학교 학사 일정 {len(schedule)}개 스크래핑 완료")
                 return schedule
         except ClientError as e:
-            logger.error(f"기숙사 홈페이지 HTTP 요청 실패: {e}")
+            logger.error(f"e-Class에 HTTP 요청 실패: {e}")
         except HttpProcessingError as e:
-            logger.error(f"기숙사 홈페이지 요청 중 HTTP 에러 발생: {e}")
+            logger.error(f"e-Class에 학교 학사 일정 요청 중 HTTP 에러 발생: {e}")
         except Exception as e:
-            logger.error(f"기숙사 홈페이지에서 알 수 없는 오류 발생: {e}")
+            logger.error(f"e-Class에서 알 수 없는 오류 발생: {e}")
             logger.error(traceback.format_exc())
         return []
