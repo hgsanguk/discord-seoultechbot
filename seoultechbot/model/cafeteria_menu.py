@@ -40,7 +40,7 @@ class SecondStudentsUnionBuilding(Base):
     """
     __tablename__ = 'cafeteria_menu_su'
 
-    date = Column(Integer, unique=True)
+    date = Column(Integer, primary_key=True)
     lunch_a_name = Column(String, name="lunch_a_name")
     lunch_a_price = Column(String, name="lunch_a_price")
     lunch_a_menu = Column(String, name="lunch_a_menu")
