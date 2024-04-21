@@ -36,7 +36,7 @@ async def fetch_su_building(start_date: datetime) -> dict:
         학교 홈페이지에서 제2학생회관의 식단을 시작일부터 그 주의 금요일까지 비동기적으로 가져옵니다.
 
         :param session: HTTP GET할 aiohttp의 ClientSession 객체
-        :param date: 스크래핑할 날짜 (datetime)
+        :param target_date: 스크래핑을 시작할 날짜 (datetime)
         :return: `dict` - 점심/저녁의 코너 이름, 가격, 메뉴
         """
         date_str = target_date.strftime("%Y-%m-%d")
@@ -81,3 +81,48 @@ async def fetch_su_building(start_date: datetime) -> dict:
         results = await asyncio.gather(*tasks.values(), return_exceptions=True)  # 예외가 발생해도 크래시 되지 않도록 설정
         # 날짜와 스크래핑 결과 쌍을 dict로 변환
         return dict(zip(tasks.keys(), results))
+
+
+async def fetch_technopark() -> dict:
+    """
+    서울테크노파크 홈페이지의 식단표 게시판에서 최신 게시물의 식단표 정보를 비동기적으로 가져옵니다.
+
+    :return: `dict` - {'id': 게시물 번호, 'title': 게시물 제목, 'img_url': 식단표 이미지 링크}
+    """
+    async def fetch(url: str, session: ClientSession):
+        async with session.get(url) as response:
+            if response.status != 200:
+                raise HttpProcessingError(code=response.status, message='HTTP 오류 발생')
+            return await response.text()
+
+    board_link = 'https://www.seoultp.or.kr/user/nd70791.do'  # 식단표 게시판 링크
+    try:
+        async with ClientSession(timeout=ClientTimeout(total=10)) as session:
+            html = await fetch(board_link, session)
+            parser = BeautifulSoup(html, "html.parser")
+
+            # 최신 식단표 게시물 선택
+            newest_post = parser.select_one('.board-list > tbody:nth-child(4) > tr:nth-child(1)')
+            title = newest_post.select_one('td:nth-child(2) > a:nth-child(1)')
+            post_num = title['href'].split("'")[5]
+            title_text = title.getText(strip=True)
+
+            # 최신 식단표 게시물 페이지 요청 및 이미지 링크 선택
+            post_link = board_link + '?View&boardNo=' + post_num
+            html = await fetch(post_link, session)
+            parser = BeautifulSoup(html, "html.parser")
+            content = parser.select_one('.board-write > tbody:nth-child(3) > tr:nth-child(4)')
+            img_url = 'https://www.seoultp.or.kr' + content.find(name='img')['src']
+
+            logger.info(f"서울테크노파크의 {title_text} 스크래핑 완료")
+            result = {'id': int(post_num), 'title': title_text, 'img_url': img_url}
+            return result
+
+    except ClientError as e:
+        logger.error(f"서울테크노파크 홈페이지 HTTP 요청 실패: {e}")
+    except HttpProcessingError as e:
+        logger.error(f"서울테크노파크 홈페이지 요청 중 HTTP 에러 발생: {e}")
+    except Exception as e:
+        logger.error(f"서울테크노파크 홈페이지에서 알 수 없는 오류 발생: {e}")
+        logger.error(traceback.format_exc())
+    return {}
