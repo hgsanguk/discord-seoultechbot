@@ -1,10 +1,10 @@
 """
 대표 홈페이지와 기숙사 홈페이지의 공지사항을 스크래핑하는 비동기 메서드를 포함한 파일입니다.
 """
-# 자세한 예외 발생 로그 출력을 위한 패키지
+# 자세한 예외 발생 로그 출력을 위한 라이브러리
 import traceback
 
-# 링크 Parameter 파싱을 위한 패키지
+# 링크 Parameter 파싱을 위한 라이브러리
 from urllib.parse import parse_qs, urlparse
 
 # 비동기 스크래핑과 웹 페이지 파싱을 위한 패키지
@@ -13,8 +13,9 @@ from aiohttp import ClientError, ClientSession, ClientTimeout, TCPConnector
 from aiohttp.http_exceptions import HttpProcessingError
 from bs4 import BeautifulSoup
 
-# scrapper 패키지의 로거 사용
-from seoultechbot.scrapper import logger
+# 로거 가져오기
+import logging
+logger = logging.getLogger(__name__)
 
 
 async def fetch_all():

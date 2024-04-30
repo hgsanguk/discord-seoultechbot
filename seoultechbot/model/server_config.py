@@ -1,5 +1,9 @@
+# ORM 패키지
 from sqlalchemy import Column, Integer, Boolean
-from seoultechbot.model import Base
+from sqlalchemy.ext.declarative import declarative_base
+
+# ORM Base 클래스
+Base = declarative_base()
 
 
 class ServerConfig(Base):

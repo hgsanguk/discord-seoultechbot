@@ -1,8 +1,10 @@
-import logging
-
+# Discord 명령 전송을 위한 패키지
 import discord
 from discord import app_commands
 from discord.ext import commands
+
+# 로거 설정을 위한 라이브러리
+import logging
 
 
 class Util(commands.Cog):

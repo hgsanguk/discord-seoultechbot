@@ -1,17 +1,20 @@
 """
 대학교 학사 일정의 비동기 스크래핑에 관한 모듈입니다.
 """
-# 자세한 예외 발생 로그 출력을 위한 패키지
+# 날짜 계산을 위한 라이브러리
+from datetime import datetime
+
+# 자세한 예외 발생 로그 출력을 위한 라이브러리
 import traceback
 
 # 비동기 스크래핑과 웹 페이지 파싱을 위한 패키지
-from datetime import datetime
 from aiohttp import ClientError, ClientSession, ClientTimeout
 from aiohttp.http_exceptions import HttpProcessingError
 from bs4 import BeautifulSoup
 
-# scrapper 패키지의 로거 사용
-from seoultechbot.scrapper import logger
+# 로거 가져오기
+import logging
+logger = logging.getLogger(__name__)
 
 
 async def fetch(target_date: datetime) -> list:

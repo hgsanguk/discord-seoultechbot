@@ -1,6 +1,8 @@
+from sqlalchemy.orm import declarative_base
 from sqlalchemy import Column, Integer, String
-from seoultechbot.model import Base
 
+# ORM Base 클래스
+Base = declarative_base()
 
 class Notice:
     """
@@ -25,7 +27,7 @@ class Notice:
     # content = Column(String)
 
 
-class University(Notice, Base):
+class UniversityNotice(Notice, Base):
     """
     대학교 홈페이지에서 스크래핑한 공지사항의 클래스입니다.
     카테고리로 현재 `대학공지사항, 학사공지, 장학공지, 생활관공지` 가 있습니다.
@@ -33,14 +35,14 @@ class University(Notice, Base):
     __tablename__ = 'notice_university'
 
 
-# class Colleage(Notice, Base):
+# class ColleageNotice(Notice, Base):
 #     """
 #     단과대학 홈페이지에서 스크래핑한 공지사항의 클래스입니다.
 #     """
 #     __tablename__ = 'notice_colleage'
 #
 #
-# class Department(Notice, Base):
+# class DepartmentNotice(Notice, Base):
 #     """
 #     학과 홈페이지에서 스크래핑한 공지사항의 클래스입니다.
 #     """

@@ -10,6 +10,11 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base
 from sqlalchemy.exc import SQLAlchemyError
 
+# 간편한 호출을 위한 import
+from .cafeteria_menu import SeoulTechnoparkCafeteriaMenu, SecondStudentsUnionBuildingCafeteriaMenu
+from .notice import UniversityNotice
+from .server_config import ServerConfig
+
 # 로거 가져오기
 logger = logging.getLogger(__name__)
 
@@ -21,7 +26,7 @@ USER = os.getenv("STBOT_DB_USER")
 PASSWORD = os.getenv("STBOT_DB_PASSWORD")
 
 # 어떤 DB를 사용하는지 체크하고 연결 시도
-if TYPE == "MYSQL" or "MARIADB":
+if TYPE == "MYSQL" or TYPE == "MARIADB":
     # MySQL 혹은 MariaDB
     try:
         conn_str = f"mysql+mysqldb://{USER}:{PASSWORD}@{HOST}:{PORT}/{NAME}"
@@ -32,10 +37,10 @@ if TYPE == "MYSQL" or "MARIADB":
     except SQLAlchemyError as e:
         engine = None
         logger.error(f"{TYPE}에 연결 도중 오류 발생: {e}")
-        sys.exit(f"{TYPE}에 연결 도중 오류 발생하여 봇을 종료합니다. 입력한 정보가 올바른지 확인한 후 다시 시도해주세요.")
+        sys.exit(f"{TYPE}에 연결 도중 오류 발생하여 봇을 종료합니다. DB 서버의 상태와 입력한 정보가 올바른지 확인한 후 다시 시도해주세요.")
 else:
     # SQLite
-    engine = create_engine('sqlite://../../seoultechbot-discord.db')
+    engine = create_engine('sqlite:///../../seoultechbot-discord.db')
 
 Base = declarative_base()
 Base.metadata.create_all(engine)

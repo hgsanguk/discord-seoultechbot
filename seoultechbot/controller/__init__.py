@@ -1,10 +1,3 @@
-import logging
-
-# DB와 상호작용을 ORM 세션
-from sqlalchemy.orm import sessionmaker
-
-# 모델 불러오기
-from seoultechbot.model import engine
-
-session = sessionmaker(bind=engine)
-logger = logging.getLogger(__name__)
+"""
+sqlalchemy ORM을 사용하여 봇의 데이터베이스를 관리하는 패키지입니다.
+"""

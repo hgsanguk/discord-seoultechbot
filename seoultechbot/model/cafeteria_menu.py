@@ -1,8 +1,10 @@
 from sqlalchemy import Column, Integer, String
-from seoultechbot.model import Base
+from sqlalchemy.orm import declarative_base
 
+# ORM Base 클래스
+Base = declarative_base()
 
-class SeoulTechnopark(Base):
+class SeoulTechnoparkCafeteriaMenu(Base):
     """
     서울테크노파크 구내식당의 일일 메뉴 클래스입니다.
 
@@ -21,7 +23,7 @@ class SeoulTechnopark(Base):
     image_url = Column(String, name="img_url", nullable=False)
 
 
-class SecondStudentsUnionBuilding(Base):
+class SecondStudentsUnionBuildingCafeteriaMenu(Base):
     """
     제2학생회관 학생식당의 일일 메뉴 클래스입니다.
     해당 코드 작성 기준 첫번째 메뉴, 두번째 메뉴까지만 판매하므로 최대 두 개의 메뉴까지 지원합니다.
