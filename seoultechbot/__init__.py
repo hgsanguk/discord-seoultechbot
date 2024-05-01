@@ -1,12 +1,12 @@
 """
 Discord의 SeoulTechBot 프로젝트 패키지입니다.
 """
-
 # 환경 변수 사용을 위한 모듈
 import os
 
 # 로거 설정을 위한 모듈
 import logging
+from datetime import datetime, timedelta
 from logging.handlers import TimedRotatingFileHandler
 
 # 봇 상태 표시를 위한 모듈
@@ -15,6 +15,9 @@ from itertools import cycle
 # Discord 상에서 봇의 작동을 위한 패키지
 import discord
 from discord.ext import commands
+
+# OpenAPI 토큰 검증을 위한 패키지
+import requests
 
 
 class SeoulTechBot(commands.Bot):
@@ -49,6 +52,7 @@ class SeoulTechBot(commands.Bot):
         self.__weather_api_token = os.getenv("STBOT_WEATHER_API_TOKEN")
         self.__scrap_period = os.getenv("STBOT_SCRAP_PERIOD", 600)
         self.__debug_server_id = os.getenv("STBOT_DEBUG_SERVER_ID", None)
+        self.__valid_weather_api_token = False
         
         # 자원 절약을 위해 필수적인 Intents만 허용합니다.
         intents = discord.Intents.none()
@@ -147,7 +151,18 @@ class SeoulTechBot(commands.Bot):
             self.__logger.warning("스크랩 주기가 60초 미만입니다. 봇이 원활하게 작동하지 않거나, 학교 홈페이지가 봇의 스크래핑을 거부할 가능성이 있습니다.")
 
         # 날씨 토큰 확인
-        if not self.__weather_api_token:
-            self.__logger.warning('오픈 API 기상청 단기예보 조회서비스 토큰을 입력하지 않았습니다. 봇의 날씨 기능이 비활성화 됩니다.')
-        else:
+        if self.__weather_api_token:
             self.__logger.info('오픈 API 기상청 단기예보 조회서비스 토큰 (앞 10자리): ' + self.__weather_api_token[0:10])
+            base_time = datetime.now() - timedelta(hours=1) if int(datetime.now().minute) < 45 else datetime.now()
+            params = {'serviceKey': self.__weather_api_token, 'dataType': 'JSON', 'numOfRows': '1000',
+                      'base_date': base_time.strftime('%Y%m%d'),
+                      'base_time': base_time.strftime('%H') + '30', 'nx': '61', 'ny': '128'}
+            result = requests.get('http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getUltraSrtFcst', params=params, timeout=10)
+            result_code = result.json()['response']['header']['resultCode']
+            if result_code != '00':
+                self.__logger.error('오픈 API 기상청 단기예보 조회서비스 토큰 검증 실패. 봇의 날씨 기능이 비활성화 됩니다.')
+            else:
+                self.__logger.info('오픈 API 기상청 단기예보 조회서비스 토큰 검증 성공.')
+                self.__valid_weather_api_token = True
+        else:
+            self.__logger.warning('오픈 API 기상청 단기예보 조회서비스 토큰을 입력하지 않았습니다. 봇의 날씨 기능이 비활성화 됩니다.')
