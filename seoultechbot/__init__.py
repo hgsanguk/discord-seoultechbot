@@ -1,12 +1,13 @@
 """
 Discord의 SeoulTechBot 프로젝트 패키지입니다.
 """
+import asyncio
 # 환경 변수 사용을 위한 모듈
 import os
 
 # 로거 설정을 위한 모듈
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime
 from logging.handlers import TimedRotatingFileHandler
 
 # 봇 상태 표시를 위한 모듈
@@ -17,7 +18,7 @@ import discord
 from discord.ext import commands
 
 # OpenAPI 토큰 검증을 위한 패키지
-import requests
+from seoultechbot import scrapper
 
 
 class SeoulTechBot(commands.Bot):
@@ -80,8 +81,10 @@ class SeoulTechBot(commands.Bot):
         # Cog 초기화
         SeoulTechBot.status = cycle(['봇 초기화 중...'])
         self.__logger.info('봇 초기화 중...')
-        await self.load_extension('seoultechbot.command.util')
         await self.load_extension('seoultechbot.event')
+        await self.load_extension('seoultechbot.command.util')
+        if self.__valid_weather_api_token:
+            await self.load_extension('seoultechbot.command.weather')
 
         # Discord 서버와 명령어 동기화
         # DEBUG 모드이고 봇 소유자가 특정 서버에서 디버그를 원할 경우, 특정 서버에서만 명령어 동기화 진행
@@ -117,7 +120,7 @@ class SeoulTechBot(commands.Bot):
         formatter = logging.Formatter('[%(asctime)s][%(levelname)s] - [%(name)s] %(message)s')
 
         # 30일 간 6개의 로그, 총 180일 간의 로그를 저장
-        file_handler = TimedRotatingFileHandler(filename, encoding='utf-8', when='D', interval=30, backupCount=6)
+        file_handler = TimedRotatingFileHandler(filename, 'D', 30, 6, 'utf-8')
         file_handler.setFormatter(formatter)
         file_handler.suffix = "%Y%m%d"
 
@@ -153,13 +156,7 @@ class SeoulTechBot(commands.Bot):
         # 날씨 토큰 확인
         if self.__weather_api_token:
             self.__logger.info('오픈 API 기상청 단기예보 조회서비스 토큰 (앞 10자리): ' + self.__weather_api_token[0:10])
-            base_time = datetime.now() - timedelta(hours=1) if int(datetime.now().minute) < 45 else datetime.now()
-            params = {'serviceKey': self.__weather_api_token, 'dataType': 'JSON', 'numOfRows': '1000',
-                      'base_date': base_time.strftime('%Y%m%d'),
-                      'base_time': base_time.strftime('%H') + '30', 'nx': '61', 'ny': '128'}
-            result = requests.get('http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getUltraSrtFcst', params=params, timeout=10)
-            result_code = result.json()['response']['header']['resultCode']
-            if result_code != '00':
+            if not asyncio.run(scrapper.weather.fetch(datetime.now())):
                 self.__logger.error('오픈 API 기상청 단기예보 조회서비스 토큰 검증 실패. 봇의 날씨 기능이 비활성화 됩니다.')
             else:
                 self.__logger.info('오픈 API 기상청 단기예보 조회서비스 토큰 검증 성공.')
