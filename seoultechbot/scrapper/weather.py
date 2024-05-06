@@ -77,12 +77,11 @@ async def fetch(target_time: datetime) -> dict:
             await session.close()
             return result_dict
     except ClientError as e:
-        logger.error(f"공공데이터포털에 HTTP 요청 실패: {e}")
+        logger.exception(f"공공데이터포털에 HTTP 요청 실패: {e}")
     except HttpProcessingError as e:
-        logger.error(f"공공데이터포털에 학교 학사 일정 요청 중 HTTP 에러 발생: {e}")
+        logger.exception(f"공공데이터포털에 학교 학사 일정 요청 중 HTTP 에러 발생: {e}")
     except AbnormalResultCodeFromOpenAPIException as e:
-        logger.error(f"공공데이터포털에서 적절하지 않은 응답 코드를 받음: {e}")
+        logger.exception(f"공공데이터포털에서 적절하지 않은 응답 코드를 받음: {e}")
     except Exception as e:
-        logger.error(f"공공데이터포털에서 알 수 없는 오류 발생: {e}")
-        logger.error(traceback.format_exc())
+        logger.exception(f"공공데이터포털에서 알 수 없는 오류 발생: {e}")
     return {}

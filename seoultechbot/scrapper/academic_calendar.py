@@ -44,10 +44,9 @@ async def fetch(target_date: datetime) -> list:
                 logger.info(f"{date}의 학교 학사 일정 {len(schedule)}개 스크래핑 완료")
                 return schedule
         except ClientError as e:
-            logger.error(f"e-Class에 HTTP 요청 실패: {e}")
+            logger.exception(f"e-Class에 HTTP 요청 실패: {e}")
         except HttpProcessingError as e:
-            logger.error(f"e-Class에 학교 학사 일정 요청 중 HTTP 에러 발생: {e}")
+            logger.exception(f"e-Class에 학교 학사 일정 요청 중 HTTP 에러 발생: {e}")
         except Exception as e:
-            logger.error(f"e-Class에서 알 수 없는 오류 발생: {e}")
-            logger.error(traceback.format_exc())
+            logger.exception(f"e-Class에서 알 수 없는 오류 발생: {e}")
         return []

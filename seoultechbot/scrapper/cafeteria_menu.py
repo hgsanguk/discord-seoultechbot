@@ -67,12 +67,11 @@ async def fetch_su_building(start_date: datetime) -> dict:
                 return menu
 
         except ClientError as e:
-            logger.error(f"제2학생회관의 {target_date.year}년 {target_date.month}월 {target_date.day}일 식단 HTTP 요청 실패: {e}")
+            logger.exception(f"제2학생회관의 {target_date.year}년 {target_date.month}월 {target_date.day}일 식단 HTTP 요청 실패: {e}")
         except HttpProcessingError as e:
-            logger.error(f"제2학생회관의 {target_date.year}년 {target_date.month}월 {target_date.day}일 식단 페이지 요청 중 HTTP 에러 발생: {e}")
+            logger.exception(f"제2학생회관의 {target_date.year}년 {target_date.month}월 {target_date.day}일 식단 페이지 요청 중 HTTP 에러 발생: {e}")
         except Exception as e:
-            logger.error(f"제2학생회관의 {target_date.year}년 {target_date.month}월 {target_date.day}일 식단 페이지 요청 중 알 수 없는 오류 발생: {e}")
-            logger.error(traceback.format_exc())
+            logger.exception(f"제2학생회관의 {target_date.year}년 {target_date.month}월 {target_date.day}일 식단 페이지 요청 중 알 수 없는 오류 발생: {e}")
         return {}
 
     # 시작일부터 그 주의 금요일까지 식단을 비동기적으로 스크래핑
@@ -120,10 +119,9 @@ async def fetch_technopark() -> dict:
             return result
 
     except ClientError as e:
-        logger.error(f"서울테크노파크 홈페이지 HTTP 요청 실패: {e}")
+        logger.exception(f"서울테크노파크 홈페이지 HTTP 요청 실패: {e}")
     except HttpProcessingError as e:
-        logger.error(f"서울테크노파크 홈페이지 요청 중 HTTP 에러 발생: {e}")
+        logger.exception(f"서울테크노파크 홈페이지 요청 중 HTTP 에러 발생: {e}")
     except Exception as e:
-        logger.error(f"서울테크노파크 홈페이지에서 알 수 없는 오류 발생: {e}")
-        logger.error(traceback.format_exc())
+        logger.exception(f"서울테크노파크 홈페이지에서 알 수 없는 오류 발생: {e}")
     return {}

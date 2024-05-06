@@ -74,17 +74,16 @@ async def fetch_all():
                         notices.append(notice)
                         # logger.debug(f"대표 홈페이지의 {board_name} 게시판에서 {board_num}번 게시물 스크래핑")
                     except AttributeError as e:
-                        logger.warning(f"대표 홈페이지의 {board_name} 게시판에서 예상한 구조와 다른 구조의 게시물을 감지: {e}")
+                        logger.warning(f"대표 홈페이지의 {board_name} 게시판에서 예상한 구조와 다른 구조의 게시물을 감지: {e}", exc_info=True)
                         continue
                 logger.info(f"대표 홈페이지의 {board_name} 게시판 공지사항 목록 스크래핑 완료")
                 return notices
         except ClientError as e:
-            logger.error(f"대표 홈페이지의 {board_name} 게시판 HTTP 요청 실패: {e}")
+            logger.exception(f"대표 홈페이지의 {board_name} 게시판 HTTP 요청 실패: {e}")
         except HttpProcessingError as e:
-            logger.error(f"대표 홈페이지의 {board_name} 게시판에서 HTTP 에러 발생: {e}")
+            logger.exception(f"대표 홈페이지의 {board_name} 게시판에서 HTTP 에러 발생: {e}")
         except Exception as e:
-            logger.error(f"대표 홈페이지의 {board_name} 게시판에서 알 수 없는 오류 발생: {e}")
-            logger.error(traceback.format_exc())
+            logger.exception(f"대표 홈페이지의 {board_name} 게시판에서 알 수 없는 오류 발생: {e}")
         return []
 
     async def fetch_dormitory(session: ClientSession) -> list:
@@ -121,17 +120,16 @@ async def fetch_all():
                         notices.append(notice)
                         # logger.debug(f"기숙사 홈페이지의 공지사항에서 {board_num}번 게시물 스크래핑")
                     except AttributeError as e:
-                        logger.warning(f"기숙사 홈페이지의 공지사항에서 예상한 구조와 다른 구조의 게시물을 감지: {e}")
+                        logger.warning(f"기숙사 홈페이지의 공지사항에서 예상한 구조와 다른 구조의 게시물을 감지: {e}", exc_info=True)
                         continue
                 logger.info(f"기숙사 공지사항 목록 스크래핑 완료")
                 return notices
         except ClientError as e:
-            logger.error(f"기숙사 홈페이지 HTTP 요청 실패: {e}")
+            logger.exception(f"기숙사 홈페이지 HTTP 요청 실패: {e}")
         except HttpProcessingError as e:
-            logger.error(f"기숙사 홈페이지 요청 중 HTTP 에러 발생: {e}")
+            logger.exception(f"기숙사 홈페이지 요청 중 HTTP 에러 발생: {e}")
         except Exception as e:
-            logger.error(f"기숙사 홈페이지에서 알 수 없는 오류 발생: {e}")
-            logger.error(traceback.format_exc())
+            logger.exception(f"기숙사 홈페이지에서 알 수 없는 오류 발생: {e}")
         return []
 
     # 대학공지사항, 학사공지, 장학공지, 기숙사공지 스크래핑
