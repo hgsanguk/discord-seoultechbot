@@ -9,7 +9,7 @@ class Event(commands.Cog):
     """
     봇의 이벤트를 관리하는 클래스 입니다.
     """
-    def __init__(self, bot):
+    def __init__(self, bot: SeoulTechBot):
         self.__bot = bot
         self.__logger = logging.getLogger(__name__)
         self.__logger.debug(f'{__name__} 모듈 초기화 완료')
@@ -27,8 +27,7 @@ class Event(commands.Cog):
                                    '`/도움` 명령어로 명령어의 목록을 확인하실 수 있습니다.')
                 break
         self.__logger.info(f'{guild.name}({guild.id}) 서버에서 {self.__bot.user.name} 추가')
-        SeoulTechBot.status = cycle(['도움말: /도움', f'{SeoulTechBot.get_version()}', f'{len(self.__bot.guilds)}개의 서버와 함께'])
-        self.__logger.debug(f'봇의 상태 갱신 완료, {len(self.__bot.guilds)}개의 서버에서 봇 이용 중')
+        self.__bot.refresh_guilds_count()
 
     @commands.Cog.listener()
     async def on_guild_remove(self, guild):
@@ -38,8 +37,7 @@ class Event(commands.Cog):
         :param guild: 제거된 서버의 정보
         """
         self.__logger.info(f'{guild.name}({guild.id}) 서버에서 {self.__bot.user.name} 제거')
-        SeoulTechBot.status = cycle(['도움말: /도움', f'{SeoulTechBot.get_version()}', f'{len(self.__bot.guilds)}개의 서버와 함께'])
-        self.__logger.debug(f'봇의 상태 갱신 완료, {len(self.__bot.guilds)}개의 서버에서 봇 이용 중')
+        self.__bot.refresh_guilds_count()
 
 
 async def setup(bot):

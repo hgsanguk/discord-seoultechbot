@@ -10,25 +10,25 @@ class Task(commands.Cog):
     """
     봇의 Task를 관리하는 클래스입니다.
     """
-    def __init__(self, bot):
+    def __init__(self, bot: SeoulTechBot):
         self.__bot = bot
         self.__logger = logging.getLogger(__name__)
         self.__logger.debug(f'{__name__} 모듈 초기화 완료')
 
     async def cog_load(self):
         self.__logger.info('봇의 Task 시작')
-        self.__loop_status.start()
+        self.__rotate_activity_name.start()
 
     async def cog_unload(self):
         self.__logger.info('봇의 Task 종료')
-        self.__loop_status.cancel()
+        self.__rotate_activity_name.cancel()
 
     @tasks.loop(seconds=3)
-    async def __loop_status(self):
+    async def __rotate_activity_name(self):
         """
         Discord 내에서 표시되는 봇 상태 중 '게임 하는 중'에 표시하는 메세지를 3초 간격으로 순환 표시합니다.
         """
-        await self.__bot.change_presence(activity=discord.Game(next(SeoulTechBot.status)))
+        await self.__bot.change_presence(activity=discord.Game(next(self.__bot.game_name)))
 
 
 async def setup(bot):

@@ -26,24 +26,21 @@ class SeoulTechBot(commands.Bot):
     :class:`commands.Bot` 클래스를 상속받아 봇의 정보를 관리하고, 초기화하는 클래스입니다.
 
     Attributes:
-        status (cycle): Discord 내에서 표시되는 봇 상태 중 '게임 하는 중'에 표시할 메세지 cycle 입니다.
+        __game_name (cycle): Discord 내에서 표시되는 봇 상태 중 '게임 하는 중'에 표시할 메세지 cycle 입니다.
         __VERSION (str): Discord의 SeoulTechBot 프로젝트 버전입니다.
         __program_level (str): 프로그램 레벨입니다. 기본은 'RELEASE'이며 'DEBUG'일 경우 디버그 모드로 작동합니다.
         __weather_api_token (str): 오픈 API 기상청 단기예보 조회서비스 토큰입니다.
         __scrap_period (int): 대학교 공지사항을 스크래핑할 주기입니다. 단위는 초 단위이며, 단과대/학과 공지사항 스크래핑은 별도의 주기를 따릅니다.
         __debug_server_id (str): 디버깅 할 봇 서버의 ID입니다. 입력하지 않을 경우 명령어를 전체 서버와 동기화하므로 디버깅에 시간이 소요될 수 있습니다.
-        __logger (logging.logger): 프로젝트 내 모든 로거의 부모 로거입니다.
+        __logger (logging.logger): seoultechbot 패키지 내 모든 로거의 부모 로거입니다.
     """
 
-    status = cycle(['봇 시작 중...'])
+    __game_name = cycle(['봇 시작 중...'])
     __VERSION = 'v1.3'
 
-    @staticmethod
-    def get_version() -> str:
-        """
-        프로젝트의 버전을 가져옵니다.
-        """
-        return SeoulTechBot.__VERSION
+    @property
+    def game_name(self) -> cycle:
+        return self.__game_name
 
     def __init__(self):
         """
@@ -65,7 +62,7 @@ class SeoulTechBot(commands.Bot):
 
         # 봇 정보 로그에 표시
         self.__logger.info(f"SEOULTECHBOT PROJECT - DISCORD BOT FOR SEOULTECH")
-        self.__logger.info(f"PROJECT VERSION {SeoulTechBot.__VERSION}, BOT MODE: {self.__program_level}")
+        self.__logger.info(f"PROJECT VERSION {self.__VERSION}, BOT MODE: {self.__program_level}")
         self.__logger.debug("디버그 모드가 활성화되었습니다.")
 
         # 입력한 정보 유효성 확인
@@ -79,7 +76,7 @@ class SeoulTechBot(commands.Bot):
         봇 실행 파일들을 초기화하고 봇의 명령어를 Discord 서버와 동기화 합니다.
         """
         # Cog 초기화
-        SeoulTechBot.status = cycle(['봇 초기화 중...'])
+        self.__game_name = cycle(['봇 초기화 중...'])
         self.__logger.info('봇 초기화 중...')
         await self.load_extension('seoultechbot.event')
         await self.load_extension('seoultechbot.command.util')
@@ -107,7 +104,7 @@ class SeoulTechBot(commands.Bot):
         """
         await self.load_extension('seoultechbot.task')
 
-        SeoulTechBot.status = cycle(['도움말: /도움', f'{SeoulTechBot.__VERSION}', f'{len(self.guilds)}개의 서버와 함께'])
+        self.refresh_guilds_count()
         self.__logger.info(f'{self.user.name} 실행 완료, {len(self.guilds)}개의 서버에서 봇 이용 중')
 
     def __setup_logger(self):
@@ -163,3 +160,10 @@ class SeoulTechBot(commands.Bot):
                 self.__valid_weather_api_token = True
         else:
             self.__logger.warning('오픈 API 기상청 단기예보 조회서비스 토큰을 입력하지 않았습니다. 봇의 날씨 기능이 비활성화 됩니다.')
+
+    def refresh_guilds_count(self):
+        """
+        봇의 '게임 하는 중' 메세지에서 봇을 사용 중인 서버의 갯수를 갱신합니다.
+        """
+        self.__game_name = cycle(['도움말: /도움', f'{self.__VERSION}', f'{len(self.guilds)}개의 서버와 함께'])
+        self.__logger.debug(f'이용 중인 서버 갯수 갱신. {len(self.guilds)}개의 서버에서 봇 이용 중')
