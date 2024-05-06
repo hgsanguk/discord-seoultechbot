@@ -8,6 +8,9 @@
 # DB Files
 *.db
 
-# TechBot logs
+# SeoulTechBot logs
 *.log
 *.log.*
+
+# PyCache
+__pycache__
