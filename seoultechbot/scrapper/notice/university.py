@@ -1,9 +1,6 @@
 """
 대표 홈페이지와 기숙사 홈페이지의 공지사항을 스크래핑하는 비동기 메서드를 포함한 파일입니다.
 """
-# 자세한 예외 발생 로그 출력을 위한 라이브러리
-import traceback
-
 # 링크 Parameter 파싱을 위한 라이브러리
 from urllib.parse import parse_qs, urlparse
 
@@ -35,7 +32,7 @@ async def fetch_all():
 
         :param session: HTTP GET할 aiohttp의 ClientSession 객체입니다.
         :param board_name: 게시판 이름으로, 대학교 대표 홈페이지 공지사항 링크의 제일 뒤에 들어갈 경로입니다.
-        :return: `list[University]` - 게시물 번호, 게시판 번호, 게시물 제목, 작성자
+        :return: `list[dict]` - 게시물 번호, 게시판 번호, 게시물 제목, 작성자
         """
         if not board_name in board_list:
             raise ValueError('잘못된 게시판 주소를 입력하였습니다.')
@@ -92,7 +89,7 @@ async def fetch_all():
         위의 링크(기숙사 홈페이지 공지사항)의 첫 페이지를 비동기로 스크래핑 해 게시물 정보를 포함한 코루틴 객체를 반환합니다.
 
         :param session: HTTP GET할 aiohttp의 ClientSession 객체입니다.
-        :return: `list[University]` - 게시물 번호, 게시판 번호, 게시물 제목, 작성자
+        :return: `list[dict]` - 게시물 번호, 게시판 번호, 게시물 제목, 작성자
         """
         link = 'https://domi.seoultech.ac.kr/do/notice/'
         try:

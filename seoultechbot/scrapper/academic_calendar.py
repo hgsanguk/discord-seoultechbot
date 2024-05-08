@@ -4,9 +4,6 @@
 # 날짜 계산을 위한 라이브러리
 from datetime import datetime
 
-# 자세한 예외 발생 로그 출력을 위한 라이브러리
-import traceback
-
 # 비동기 스크래핑과 웹 페이지 파싱을 위한 패키지
 from aiohttp import ClientError, ClientSession, ClientTimeout
 from aiohttp.http_exceptions import HttpProcessingError

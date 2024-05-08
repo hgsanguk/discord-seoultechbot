@@ -4,15 +4,14 @@ import os
 # 시간 계산을 위한 라이브러리
 from datetime import datetime, timedelta
 
-# 자세한 예외 발생 로그 출력을 위한 라이브러리
-import traceback
-
 # 비동기 요청을 위한 패키지
 from aiohttp import ClientError, ClientSession, ClientTimeout
 from aiohttp.http_exceptions import HttpProcessingError
 
 # API 응답 예외 처리를 위한 import
 from seoultechbot.exception import AbnormalResultCodeFromOpenAPIException
+
+# API를 가져오기 위한
 
 # 로거 가져오기
 import logging
