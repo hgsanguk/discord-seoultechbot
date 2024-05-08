@@ -1,46 +1,38 @@
 """
 sqlalchemy ORM을 사용하여 봇의 데이터베이스 모델을 관리하는 패키지입니다.
 """
-import logging
+# 환경변수 가져오기 위한 라이브러리
 import os
+
+# 오류 시 종료를 위한 라이브러리
 import sys
 
+# 로거 설정을 위한 라이브러리
+import logging
+
 # DB와 상호작용을 위한 ORM
-from sqlalchemy import create_engine
-from sqlalchemy.orm import declarative_base
+from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.exc import SQLAlchemyError
 
-# 간편한 호출을 위한 import
+# 데이터베이스 초기화를 위한 import
+from .base import Base
 from .cafeteria_menu import SeoulTechnoparkCafeteriaMenu, SecondStudentsUnionBuildingCafeteriaMenu
 from .notice import UniversityNotice
 from .server_config import ServerConfig
+from seoultechbot.config import Config
 
 # 로거 가져오기
 logger = logging.getLogger(__name__)
 
-TYPE = os.getenv("STBOT_DB_TYPE", "SQLITE")
-HOST = os.getenv("STBOT_DB_HOST")
-PORT = os.getenv("STBOT_DB_PORT", 3306)
-NAME = os.getenv("STBOT_DB_NAME")
-USER = os.getenv("STBOT_DB_USER")
-PASSWORD = os.getenv("STBOT_DB_PASSWORD")
 
-# 어떤 DB를 사용하는지 체크하고 연결 시도
-if TYPE == "MYSQL" or TYPE == "MARIADB":
-    # MySQL 혹은 MariaDB
+async def init_db():
+    # DB에 연결 및 초기화
     try:
-        conn_str = f"mysql+mysqldb://{USER}:{PASSWORD}@{HOST}:{PORT}/{NAME}"
-        engine = create_engine(conn_str)
-        logger.debug(f"{conn_str}에 연결 중...")
-        engine.connect()
-        logger.info(f"{TYPE}에 연결 완료")
+        engine = create_async_engine(Config().db_connection_str)
+        logger.info(f"데이터베이스에 연결 완료")
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+        logger.info(f"데이터베이스 초기화 완료")
     except SQLAlchemyError as e:
-        engine = None
-        logger.error(f"{TYPE}에 연결 도중 오류 발생: {e}")
-        sys.exit(f"{TYPE}에 연결 도중 오류 발생하여 봇을 종료합니다. DB 서버의 상태와 입력한 정보가 올바른지 확인한 후 다시 시도해주세요.")
-else:
-    # SQLite
-    engine = create_engine('sqlite:///../../seoultechbot-discord.db')
-
-Base = declarative_base()
-Base.metadata.create_all(engine)
+        logger.exception(f"데이터베이스에 초기화 도중 오류 발생: {e}")
+        sys.exit("데이터베이스 초기화 중 오류가 발생하여 봇을 종료합니다. DB 서버의 상태와 입력한 정보가 올바른지 확인한 후 다시 시도해주세요.")

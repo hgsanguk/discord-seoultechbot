@@ -1,8 +1,6 @@
 from sqlalchemy import Column, Integer, String
-from sqlalchemy.orm import declarative_base
+from seoultechbot.model import Base
 
-# ORM Base 클래스
-Base = declarative_base()
 
 class SeoulTechnoparkCafeteriaMenu(Base):
     """
@@ -12,7 +10,7 @@ class SeoulTechnoparkCafeteriaMenu(Base):
         id (int): 서울테크노파크 홈페이지에 올라오는 식단의 게시물 고유번호입니다. 데이터베이스에 id로 저장되는 Primary Key입니다.
         week (int): 식단의 연도와 주차로, 형식은 `YYWW` 입니다. 해당 Attribute는 중복 저장을 막기 위해 unique합니다.
         title (str): 서울테크노파크 홈페이지에 올라오는 식단의 게시물 제목입니다. 해당 달의 몇 번째 주 식단표인지 표시하기 위해 사용합니다.
-        image_link (str): 서울테크노파크의 식단의 게시물 내의 식단 이미지 링크입니다.
+        image_url (str): 서울테크노파크의 식단의 게시물 내의 식단 이미지 링크입니다.
     """
 
     __tablename__ = 'cafeteria_menu_stp'
