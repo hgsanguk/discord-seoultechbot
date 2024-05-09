@@ -1,8 +1,6 @@
 import logging
-
 import discord
 from discord.ext import commands, tasks
-
 from seoultechbot import SeoulTechBot
 
 
@@ -17,14 +15,14 @@ class Task(commands.Cog):
 
     async def cog_load(self):
         self.__logger.info('봇의 Task 시작')
-        self.__rotate_activity_name.start()
+        self.__rotate_game_name.start()
 
     async def cog_unload(self):
         self.__logger.info('봇의 Task 종료')
-        self.__rotate_activity_name.cancel()
+        self.__rotate_game_name.cancel()
 
     @tasks.loop(seconds=3)
-    async def __rotate_activity_name(self):
+    async def __rotate_game_name(self):
         """
         Discord 내에서 표시되는 봇 상태 중 '게임 하는 중'에 표시하는 메세지를 3초 간격으로 순환 표시합니다.
         """
