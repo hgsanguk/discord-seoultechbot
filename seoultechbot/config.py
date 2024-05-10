@@ -3,7 +3,7 @@ import os
 
 class Config:
     """
-    봇의 환경설정을 담은 클래스입니다.
+    봇의 환경설정을 담은 싱글톤 클래스입니다.
 
     Attributes:
         __program_level: 프로그램 레벨입니다. 기본은 'RELEASE'이며 'DEBUG'일 경우 디버그 모드로 작동합니다.
@@ -12,6 +12,13 @@ class Config:
         __debug_server_id: 디버깅 할 봇 서버의 ID입니다. 입력하지 않을 경우 명령어를 전체 서버와 동기화하므로 디버깅에 시간이 소요될 수 있습니다.
         __db_connection_str: 데이터베이스의 Connection String 입니다.
     """
+    __instance = None
+
+    def __new__(cls):
+        if not cls.__instance:
+            cls.__instance = super(Config, cls).__new__(cls)
+        return cls.__instance
+
     def __init__(self):
         self.__program_level: str = os.getenv("STBOT_PROGRAM_LEVEL", "RELEASE")
         self.__weather_api_token = os.getenv("STBOT_WEATHER_API_TOKEN")
