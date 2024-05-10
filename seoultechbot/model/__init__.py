@@ -1,9 +1,6 @@
 """
 sqlalchemy ORM을 사용하여 봇의 데이터베이스 모델을 관리하는 패키지입니다.
 """
-# 환경변수 가져오기 위한 라이브러리
-import os
-
 # 오류 시 종료를 위한 라이브러리
 import sys
 
@@ -18,7 +15,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from .base import Base
 from .cafeteria_menu import SeoulTechnoparkCafeteriaMenu, SecondStudentsUnionBuildingCafeteriaMenu
 from .notice import UniversityNotice
-from .server_config import ServerConfig
+from .discord_server import DiscordServer
 from seoultechbot.config import Config
 
 # 로거 가져오기
