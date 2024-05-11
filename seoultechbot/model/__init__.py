@@ -33,3 +33,4 @@ async def init_db():
     except SQLAlchemyError as e:
         logger.exception(f"데이터베이스에 초기화 도중 오류 발생: {e}")
         sys.exit("데이터베이스 초기화 중 오류가 발생하여 봇을 종료합니다. DB 서버의 상태와 입력한 정보가 올바른지 확인한 후 다시 시도해주세요.")
+    await engine.dispose()
