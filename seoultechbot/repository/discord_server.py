@@ -1,4 +1,4 @@
-from sqlalchemy import select
+from sqlalchemy import select, update, delete
 
 from seoultechbot.model import DiscordServer
 
@@ -13,8 +13,8 @@ class DiscordServerRepository:
         :param id: Discord 서버의 id
         :return: Discord 서버의 봇 설정(DiscordServer 객체)
         """
-        result = await self.session.execute(select(DiscordServer).where(DiscordServer.id == id))
-        return result.scalars().first()
+        result = await self.session.execute(select(DiscordServer).filter_by(id=id))
+        return result.scalar_one()
 
     async def add(self, server: DiscordServer):
         """
@@ -22,14 +22,20 @@ class DiscordServerRepository:
         :param server: DiscordServer 객체
         """
         self.session.add(server)
-        await self.session.commit()
 
-    async def update(self, config: DiscordServer):
+    async def update(self, server: DiscordServer):
         """
         SeoulTechBot 데이터베이스에서 Discord 서버의 세부사항을 업데이트 합니다.
-        :param config: Discord 서버의 봇 설정(DiscordServer 객체)
+        :param server: Discord 서버의 봇 설정(DiscordServer 객체)
         """
-        pass
+        server_dict = server.__dict__
+        server_dict.pop('_sa_instance_state')  # sqlalchemy가 부여한 고유 id는 유지
+        target_server = await self.get_by_id(server.id)
+        if target_server:
+            for key, value in server_dict.items():
+                if hasattr(target_server, key):
+                    setattr(target_server, key, value)
+        self.session.flush()  # session.dirty == True로 만들어서 변경사항 반영
 
     async def delete(self, server_id: int):
         """
