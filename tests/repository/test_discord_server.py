@@ -3,11 +3,7 @@ DiscordServerRepository 클래스의 여러 메서드를 테스트하는 모듈�
 """
 import pytest
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
-from seoultechbot.model import Base
-from seoultechbot.model import (SeoulTechnoparkCafeteriaMenu,
-                                SecondStudentsUnionBuildingCafeteriaMenu,
-                                UniversityNotice,
-                                DiscordServer)
+from seoultechbot.model import Base, DiscordServer
 from seoultechbot.repository import DiscordServerRepository
 
 
@@ -52,6 +48,10 @@ async def test_get_by_id():
         assert result.channel_id_cafeteria_menu == 100012
         assert result.cafeteria_menu_notify_time == -1
         assert result.receive_dormitory_notice is False
+
+        # 없는 서버 정보 None 인지 확인
+        result = await discord_server_repo.get_by_id(10002)
+        assert result is None
     await engine.dispose()
 
 
@@ -101,10 +101,10 @@ async def test_update():
         assert result.cafeteria_menu_notify_time == 9
         assert result.receive_dormitory_notice is True
 
-        result_2nd = await discord_server_repo.get_by_id(discord_server_2nd.id)
-        assert result_2nd is not None
-        assert result_2nd.channel_id_notice == None
-        assert result_2nd.channel_id_cafeteria_menu is None
-        assert result_2nd.cafeteria_menu_notify_time == -1
-        assert result_2nd.receive_dormitory_notice is False
+        result = await discord_server_repo.get_by_id(discord_server_2nd.id)
+        assert result is not None
+        assert result.channel_id_notice is None
+        assert result.channel_id_cafeteria_menu is None
+        assert result.cafeteria_menu_notify_time == -1
+        assert result.receive_dormitory_notice is False
     await engine.dispose()

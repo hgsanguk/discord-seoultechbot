@@ -1,10 +1,11 @@
 from sqlalchemy import select, update, delete
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from seoultechbot.model import DiscordServer
 
 
 class DiscordServerRepository:
-    def __init__(self, session):
+    def __init__(self, session: AsyncSession):
         self.session = session
 
     async def get_by_id(self, id: int) -> DiscordServer:
@@ -14,7 +15,7 @@ class DiscordServerRepository:
         :return: Discord 서버의 봇 설정(DiscordServer 객체)
         """
         result = await self.session.execute(select(DiscordServer).filter_by(id=id))
-        return result.scalar_one()
+        return result.scalar_one_or_none()
 
     async def add(self, server: DiscordServer):
         """
@@ -35,7 +36,7 @@ class DiscordServerRepository:
             for key, value in server_dict.items():
                 if hasattr(target_server, key):
                     setattr(target_server, key, value)
-        self.session.flush()  # session.dirty == True로 만들어서 변경사항 반영
+        await self.session.flush()  # session.dirty == True로 만들어서 변경사항 반영
 
     async def delete(self, server_id: int):
         """
