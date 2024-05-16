@@ -4,7 +4,7 @@ DiscordServerRepository 클래스의 여러 메서드를 테스트하는 모듈�
 import pytest
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from seoultechbot.model import Base, DiscordServer
-from seoultechbot.repository import DiscordServerRepository
+from seoultechbot.repository.async_sqlalchemy import AsyncSqlAlchemyDiscordServerRepository
 
 
 @pytest.fixture
@@ -29,7 +29,7 @@ async def test_get_by_id():
         await conn.run_sync(Base.metadata.create_all)
     AsyncSessionLocal = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
     async with AsyncSessionLocal() as session:
-        discord_server_repo = DiscordServerRepository(session)
+        discord_server_repo = AsyncSqlAlchemyDiscordServerRepository(session)
 
         # 서버 추가
         discord_server = DiscordServer(id=10001,
@@ -65,7 +65,7 @@ async def test_update():
         await conn.run_sync(Base.metadata.create_all)
     AsyncSessionLocal = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
     async with AsyncSessionLocal() as session:
-        discord_server_repo = DiscordServerRepository(session)
+        discord_server_repo = AsyncSqlAlchemyDiscordServerRepository(session)
 
         discord_server = DiscordServer(id=10001,
                                        cafeteria_menu_notify_time=-1,
