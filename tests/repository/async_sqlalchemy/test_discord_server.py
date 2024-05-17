@@ -78,23 +78,38 @@ async def test_update():
                                            receive_dormitory_notice=False,
                                            channel_id_cafeteria_menu=None,
                                            channel_id_notice=None)
-        await discord_server_repo.update(discord_server)
-        await discord_server_repo.update(discord_server_2nd)
 
         # DB 업데이트 반영됐는지 검사
+        exist_server = await discord_server_repo.update(discord_server)
         result = await discord_server_repo.get_by_id(discord_server.id)
+        assert exist_server is True
         assert result is not None
         assert result.channel_id_notice == 100015
         assert result.channel_id_cafeteria_menu == 100013
         assert result.cafeteria_menu_notify_time == 9
         assert result.receive_dormitory_notice is True
 
+        exist_server = await discord_server_repo.update(discord_server_2nd)
         result = await discord_server_repo.get_by_id(discord_server_2nd.id)
+        assert exist_server is True
         assert result is not None
         assert result.channel_id_notice is None
         assert result.channel_id_cafeteria_menu is None
         assert result.cafeteria_menu_notify_time == -1
         assert result.receive_dormitory_notice is False
+
+        # DB에 없는 서버 Update 시도
+        discord_server_3rd = DiscordServer(id=10003,
+                                           receive_dormitory_notice=True,
+                                           channel_id_notice=100031)
+        exist_server = await discord_server_repo.update(discord_server_3rd)
+        result = await discord_server_repo.get_by_id(10003)
+        assert result is not None
+        assert exist_server is False
+        assert result.channel_id_notice is 100031
+        assert result.channel_id_cafeteria_menu is None
+        assert result.cafeteria_menu_notify_time == -1
+        assert result.receive_dormitory_notice is True
     await engine.dispose()
 
 
@@ -136,6 +151,11 @@ async def test_delete():
         assert result.cafeteria_menu_notify_time == 9
         assert result.receive_dormitory_notice is True
 
+        # 없는 서버 제거 시도
+        result = await discord_server_repo.delete(10003)
+        assert result is False
+    await engine.dispose()
+
 
 @pytest.mark.asyncio
 async def test_clear_channel_id():
@@ -173,6 +193,7 @@ async def test_clear_channel_id():
         assert result is not None
         assert result.channel_id_notice is not None
         assert result.channel_id_cafeteria_menu is None
+    await engine.dispose()
 
 
 @pytest.mark.asyncio
@@ -213,6 +234,7 @@ async def test_clear_channel_id_from_column():
         assert result is not None
         assert result.channel_id_notice is not None
         assert result.channel_id_cafeteria_menu is None
+    await engine.dispose()
 
 
 @pytest.mark.asyncio
@@ -251,6 +273,7 @@ async def test_get_channel_id_cafeteria_menu_by_hour():
         assert discord_server.channel_id_cafeteria_menu not in result
         assert discord_server_2nd.channel_id_cafeteria_menu in result
         assert discord_server_3rd.channel_id_cafeteria_menu in result
+    await engine.dispose()
 
 @pytest.mark.asyncio
 async def test_get_channel_id_all_from_column():
@@ -264,6 +287,10 @@ async def test_get_channel_id_all_from_column():
     async with AsyncSessionLocal() as session:
         discord_server_repo = AsyncSqlAlchemyDiscordServerRepository(session)
 
+        # DB에 특정 알림을 설정한 서버가 없을 경우
+        result = await discord_server_repo.get_channel_id_all_from_column('channel_id_notice')
+        assert len(result) == 0
+
         discord_servers = [DiscordServer(id=10001, channel_id_notice=100011),
                            DiscordServer(id=10002, channel_id_notice=100022),
                            DiscordServer(id=10003, channel_id_notice=100031),
@@ -272,6 +299,7 @@ async def test_get_channel_id_all_from_column():
         for discord_server in discord_servers:
             discord_server_repo.add(discord_server)
 
+        # DB에 특정 알림을 설정한 서버 불러오기
         result = await discord_server_repo.get_channel_id_all_from_column('channel_id_notice')
 
         for discord_server in discord_servers:
@@ -279,3 +307,4 @@ async def test_get_channel_id_all_from_column():
                 assert discord_server.channel_id_notice in result
             else:
                 assert discord_server.channel_id_notice not in result
+    await engine.dispose()
