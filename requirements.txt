@@ -1,0 +1,6 @@
+beautifulsoup4~=4.13.0b2
+SQLAlchemy~=2.0.29
+aiohttp~=3.9.5
+discord.py~=2.3.2
+aiomysql~=0.2.0
+aiosqlite~=0.20.0
