@@ -11,8 +11,6 @@ from aiohttp.http_exceptions import HttpProcessingError
 # API 응답 예외 처리를 위한 import
 from seoultechbot.exception import AbnormalResultCodeFromOpenAPIException
 
-# API를 가져오기 위한
-
 # 로거 가져오기
 import logging
 logger = logging.getLogger(__name__)
