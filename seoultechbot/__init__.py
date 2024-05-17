@@ -112,7 +112,7 @@ class SeoulTechBot(commands.Bot):
         30일마다 로그 파일이 새 파일로 갱신되며 이전 파일은 `seoultechbot.log.%Y%m%d(로그 시작일)` 형식으로 저장됩니다.
         """
         # 로그 파일 이름과 형식 지정
-        filename = "logs/seoultechbot.log"
+        filename = "data/logs/seoultechbot.log"
         formatter = logging.Formatter('[%(asctime)s][%(levelname)s] - [%(name)s] %(message)s')
 
         # 30일 간 6개의 로그, 총 180일 간의 로그를 저장

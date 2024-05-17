@@ -36,7 +36,7 @@ class Config:
         if self.__db_type == "MYSQL" or self.__db_type == "MARIADB":
             self.__db_connection_str = f"mysql+aiomysql://{self.__db_user}:{self.__db_password}@{self.__db_host}:{self.__db_port}/{self.__db_name}"
         else:
-            self.__db_connection_str = f"sqlite+aiosqlite:///db/{self.__db_name}.db"
+            self.__db_connection_str = f"sqlite+aiosqlite:///data/db/{self.__db_name}.db"
 
     @property
     def program_level(self):
