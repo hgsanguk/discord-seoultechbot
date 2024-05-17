@@ -275,10 +275,11 @@ async def test_get_channel_id_cafeteria_menu_by_hour():
         assert discord_server_3rd.channel_id_cafeteria_menu in result
     await engine.dispose()
 
+
 @pytest.mark.asyncio
 async def test_get_channel_id_all_from_column():
     """
-    데이터베이스에서 특정 Column으로 텍스트 채널 id 목록을 불러올 수 있는지 테스트합니다.
+    데이터베이스에서 특정 Column 이름으로 텍스트 채널 id 목록을 불러올 수 있는지 테스트합니다.
     """
     engine = create_async_engine('sqlite+aiosqlite:///:memory:', echo=True)
     async with engine.begin() as conn:
@@ -304,6 +305,41 @@ async def test_get_channel_id_all_from_column():
 
         for discord_server in discord_servers:
             if discord_server.channel_id_notice:
+                assert discord_server.channel_id_notice in result
+            else:
+                assert discord_server.channel_id_notice not in result
+    await engine.dispose()
+
+
+@pytest.mark.asyncio
+async def test_get_channel_id_notice_receiving_dormitory_notice_all():
+    """
+    데이터베이스에서 기숙사 알림을 설정한 서버의 텍스트 채널 id 목록을 불러올 수 있는지 테스트합니다.
+    """
+    engine = create_async_engine('sqlite+aiosqlite:///:memory:', echo=True)
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+    AsyncSessionLocal = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+    async with AsyncSessionLocal() as session:
+        discord_server_repo = AsyncSqlAlchemyDiscordServerRepository(session)
+
+        # DB에 특정 알림을 설정한 서버가 없을 경우
+        result = await discord_server_repo.get_channel_id_notice_dormitory_all()
+        assert len(result) is 0
+
+        discord_servers = [DiscordServer(id=10001, channel_id_notice=100011, receive_dormitory_notice=True),
+                           DiscordServer(id=10002, channel_id_notice=100022),
+                           DiscordServer(id=10003, channel_id_notice=100031, receive_dormitory_notice=True),
+                           DiscordServer(id=10004, channel_id_notice=100041),
+                           DiscordServer(id=10005, receive_dormitory_notice=True)]
+        for discord_server in discord_servers:
+            discord_server_repo.add(discord_server)
+
+        # DB에 특정 알림을 설정한 서버 불러오기
+        result = await discord_server_repo.get_channel_id_notice_dormitory_all()
+
+        for discord_server in discord_servers:
+            if discord_server.receive_dormitory_notice and discord_server.channel_id_notice is not None:
                 assert discord_server.channel_id_notice in result
             else:
                 assert discord_server.channel_id_notice not in result

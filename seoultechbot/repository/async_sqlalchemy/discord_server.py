@@ -14,7 +14,7 @@ class AsyncSqlAlchemyDiscordServerRepository(DiscordServerRepository):
     SqlAlchemy로 Discord 서버들의 설정을 비동기적으로 관리하는 Repository 클래스입니다.
 
     Attributes:
-        session: SqlAlchemy의 AsyncSession
+        session: SqlAlchemy의 AsyncSession `(sqlalchemy.ext.asyncio.AsyncSession)`
     """
     def __init__(self, session: AsyncSession):
         super().__init__(session)
@@ -72,4 +72,10 @@ class AsyncSqlAlchemyDiscordServerRepository(DiscordServerRepository):
             raise ValueError('column_name은 "channel_id"를 포함해야 합니다.')
         column = getattr(DiscordServer, column_name)
         result = await self.session.execute(select(column).filter(column.is_not(None)))
+        return result.scalars().all()
+
+    async def get_channel_id_notice_dormitory_all(self):
+        result = await self.session.execute(select(DiscordServer.channel_id_notice)
+                                            .filter(DiscordServer.receive_dormitory_notice.is_(True))
+                                            .filter(DiscordServer.channel_id_notice.is_not(None)))
         return result.scalars().all()

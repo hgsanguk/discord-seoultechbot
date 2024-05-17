@@ -94,3 +94,13 @@ class DiscordServerRepository(ABC):
         :return: 텍스트 채널 id 리스트 or 튜플
         """
         raise NotImplementedError
+
+    @abstractmethod
+    def get_channel_id_notice_dormitory_all(self):
+        """
+        기숙사 공지사항 알림을 받기로 설정한 모든 Discord 서버의 텍스트 채널 id list를 반환합니다.
+        알림을 설정하지 않은 경우(DB상 Null인 경우) list에 포함 시키지 않습니다.
+
+        :return: 텍스트 채널 id 리스트 or 튜플
+        """
+        raise NotImplementedError
