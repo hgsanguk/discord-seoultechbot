@@ -23,7 +23,7 @@ class Weather(commands.Cog):
         self.__logger.debug(f'{__name__} 모듈 초기화 완료')
 
     @app_commands.command(name='날씨', description='현재 캠퍼스의 날씨와 1 ~ 6시간 뒤 날씨 예보를 보여줍니다.')
-    async def weather(self, interaction):
+    async def weather(self, interaction: discord.Interaction):
         # 로그 기록
         self.__logger.info(f"{interaction.guild.name}({interaction.guild.id})의 {interaction.channel.name}({interaction.channel.id})에서 '/날씨' 사용")
 
