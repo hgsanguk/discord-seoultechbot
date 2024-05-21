@@ -8,7 +8,7 @@ import sys
 import logging
 
 # DB와 상호작용을 위한 ORM
-from sqlalchemy.ext.asyncio import create_async_engine
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.exc import SQLAlchemyError
 
 # 데이터베이스 초기화를 위한 import
@@ -22,15 +22,16 @@ from seoultechbot.config import Config
 logger = logging.getLogger(__name__)
 
 
-async def init_db():
+async def init_db(config: Config):
     # DB에 연결 및 초기화
     try:
-        engine = create_async_engine(Config().db_connection_str)
+        engine = create_async_engine(config.db_connection_str)
         logger.info(f"데이터베이스에 연결 완료")
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
         logger.info(f"데이터베이스 초기화 완료")
+        AsyncSessionLocal = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+        return AsyncSessionLocal()
     except SQLAlchemyError as e:
         logger.exception(f"데이터베이스에 초기화 도중 오류 발생: {e}")
         sys.exit("데이터베이스 초기화 중 오류가 발생하여 봇을 종료합니다. DB 서버의 상태와 입력한 정보가 올바른지 확인한 후 다시 시도해주세요.")
-    await engine.dispose()

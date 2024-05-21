@@ -1,6 +1,15 @@
 """
 Discord의 SeoulTechBot 프로젝트 패키지입니다.
 """
+__title__ = 'seoultechbot'
+__author__ = 'Sanguk Lee'
+__license__ = 'GPL-3.0'
+__version__ = '1.3'
+
+
+# 오류 시 종료를 위한 라이브러리
+import sys
+
 # 날씨 검증을 위한 모듈
 from datetime import datetime
 
@@ -14,6 +23,7 @@ from itertools import cycle
 # Discord 상에서 봇의 작동을 위한 패키지
 import discord
 from discord.ext import commands
+from sqlalchemy.ext.asyncio import AsyncSession
 
 # 봇 초기화에 필요한 패키지
 from seoultechbot import scrapper, model
@@ -26,24 +36,32 @@ class SeoulTechBot(commands.Bot):
 
     Attributes:
         __game_name (cycle): Discord 내에서 표시되는 봇 상태 중 '게임 하는 중'에 표시할 메세지 cycle 입니다.
-        __logger (logging.logger): seoultechbot 패키지 내 모든 로거의 부모 로거입니다.
+        __enable_weather_command (bool): 날씨 활성화 여부를 체크하는 변수입니다.
+        __db_session (AsyncSession): 데이터베이스의 Session입니다.
+        __config (seoultechbot.Config): 봇의 환경 설정입니다.
     """
-
-    @property
-    def version(self):
-        """
-        :return: SeoulTechBot 버전
-        """
-        return 'v1.3'
 
     @property
     def game_name(self) -> cycle:
         return self.__game_name
 
+    @property
+    def enable_weather_command(self) -> bool:
+        return self.__enable_weather_command
+
+    @property
+    def db_session(self) -> AsyncSession:
+        return self.__db_session
+
+    @property
+    def config(self) -> Config:
+        return self.__config
+
     def __init__(self):
         """
         설정의 유효성을 확인하고 로거를 설정한 뒤, 봇을 실행합니다.
         """
+        self.__db_session = None
         self.__config = Config()  # 봇의 설정
         self.__enable_weather_command = False  # 날씨 명령어 활성화 여부
         self.__game_name = cycle(['봇 시작 중...'])
@@ -58,7 +76,7 @@ class SeoulTechBot(commands.Bot):
 
         # 봇 정보 로그에 표시
         self.__logger.info(f"SEOULTECHBOT - DISCORD BOT FOR SEOULTECH")
-        self.__logger.info(f"VERSION {self.version}, BOT MODE: {self.__config.program_level}")
+        self.__logger.info(f"VERSION {__version__}, BOT MODE: {self.__config.program_level}")
         self.__logger.debug("디버그 모드가 활성화되었습니다.")
 
         # Bot 객체 생성
@@ -71,8 +89,8 @@ class SeoulTechBot(commands.Bot):
         # 입력한 정보 유효성 확인
         await self.__verify()
 
-        # 데이터베이스 초기화
-        await model.init_db()
+        # 데이터베이스 초기화 및 세션 획득
+        self.__db_session = await model.init_db(self.__config)
 
         # Cog 초기화
         self.__game_name = cycle(['봇 초기화 중...'])
@@ -105,6 +123,13 @@ class SeoulTechBot(commands.Bot):
 
         self.refresh_guilds_count()
         self.__logger.info(f'{self.user.name} 실행 완료, {len(self.guilds)}개의 서버에서 봇 이용 중')
+
+    async def close(self):
+        """
+        DB Session을 닫고 봇을 안전하게 종료합니다.
+        """
+        await self.__db_session.close()
+        await super().close()
 
     def __setup_logger(self):
         """
@@ -171,5 +196,5 @@ class SeoulTechBot(commands.Bot):
         """
         봇의 '게임 하는 중' 메세지에서 봇을 사용 중인 서버의 갯수를 갱신합니다.
         """
-        self.__game_name = cycle(['도움말: /도움', f'{self.version}', f'{len(self.guilds)}개의 서버와 함께'])
+        self.__game_name = cycle(['도움말: /도움', f'v{__version__}', f'{len(self.guilds)}개의 서버와 함께'])
         self.__logger.debug(f'이용 중인 서버 갯수 갱신. {len(self.guilds)}개의 서버에서 봇 이용 중')
