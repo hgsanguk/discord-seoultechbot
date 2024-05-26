@@ -30,7 +30,7 @@ async def init_db(config: Config):
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
         logger.info(f"데이터베이스 초기화 완료")
-        AsyncSessionLocal = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+        AsyncSessionLocal = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False, autoflush=True)
         return AsyncSessionLocal()
     except SQLAlchemyError as e:
         logger.exception(f"데이터베이스에 초기화 도중 오류 발생: {e}")

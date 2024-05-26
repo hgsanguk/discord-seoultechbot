@@ -25,7 +25,7 @@ async def test_get_by_id():
                                        receive_dormitory_notice=False,
                                        channel_id_notice=100011,
                                        channel_id_cafeteria_menu=100012)
-        discord_server_repo.add(discord_server)
+        await discord_server_repo.add(discord_server)
 
         # 서버 정보 가져오기
         result = await discord_server_repo.get_by_id(discord_server.id)
@@ -63,8 +63,8 @@ async def test_update():
                                            receive_dormitory_notice=True,
                                            channel_id_cafeteria_menu=100021,
                                            channel_id_notice=100022)
-        discord_server_repo.add(discord_server)
-        discord_server_repo.add(discord_server_2nd)
+        await discord_server_repo.add(discord_server)
+        await discord_server_repo.add(discord_server_2nd)
 
         # 기숙사 알림 설정 및 학식 알림 설정, 공지 채널 변경
         discord_server = DiscordServer(id=10001,
@@ -133,8 +133,8 @@ async def test_delete():
                                            receive_dormitory_notice=True,
                                            channel_id_cafeteria_menu=100021,
                                            channel_id_notice=100022)
-        discord_server_repo.add(discord_server)
-        discord_server_repo.add(discord_server_2nd)
+        await discord_server_repo.add(discord_server)
+        await discord_server_repo.add(discord_server_2nd)
 
         # 첫번째 디스코드 서버 삭제
         await discord_server_repo.delete(discord_server.id)
@@ -178,8 +178,8 @@ async def test_clear_channel_id():
                                            receive_dormitory_notice=True,
                                            channel_id_cafeteria_menu=100021,
                                            channel_id_notice=100022)
-        discord_server_repo.add(discord_server)
-        discord_server_repo.add(discord_server_2nd)
+        await discord_server_repo.add(discord_server)
+        await discord_server_repo.add(discord_server_2nd)
 
         await discord_server_repo.clear_channel_id(discord_server.id, ('channel_id_notice', 'channel_id_cafeteria_menu'))
         await discord_server_repo.clear_channel_id(discord_server_2nd.id, ('channel_id_cafeteria_menu', ))
@@ -217,8 +217,8 @@ async def test_clear_channel_id_from_column():
                                            receive_dormitory_notice=True,
                                            channel_id_cafeteria_menu=100021,
                                            channel_id_notice=100022)
-        discord_server_repo.add(discord_server)
-        discord_server_repo.add(discord_server_2nd)
+        await discord_server_repo.add(discord_server)
+        await discord_server_repo.add(discord_server_2nd)
 
         # Discord 서버에서 알림 해제
         await discord_server_repo.clear_channel_id_from_column(discord_server.channel_id_notice, 'channel_id_notice')
@@ -262,9 +262,9 @@ async def test_get_channel_id_cafeteria_menu_by_hour():
                                            receive_dormitory_notice=True,
                                            channel_id_notice=100031,
                                            channel_id_cafeteria_menu=100032)
-        discord_server_repo.add(discord_server)
-        discord_server_repo.add(discord_server_2nd)
-        discord_server_repo.add(discord_server_3rd)
+        await discord_server_repo.add(discord_server)
+        await discord_server_repo.add(discord_server_2nd)
+        await discord_server_repo.add(discord_server_3rd)
 
         # 9시 알림 설정한 Discord 서버의 채널 ID 불러오기
         result = await discord_server_repo.get_channel_id_cafeteria_menu_by_hour(9)
@@ -298,7 +298,7 @@ async def test_get_channel_id_all_from_column():
                            DiscordServer(id=10004, channel_id_notice=100041),
                            DiscordServer(id=10005)]
         for discord_server in discord_servers:
-            discord_server_repo.add(discord_server)
+            await discord_server_repo.add(discord_server)
 
         # DB에 특정 알림을 설정한 서버 불러오기
         result = await discord_server_repo.get_channel_id_all_from_column('channel_id_notice')
@@ -333,7 +333,7 @@ async def test_get_channel_id_notice_receiving_dormitory_notice_all():
                            DiscordServer(id=10004, channel_id_notice=100041),
                            DiscordServer(id=10005, receive_dormitory_notice=True)]
         for discord_server in discord_servers:
-            discord_server_repo.add(discord_server)
+            await discord_server_repo.add(discord_server)
 
         # DB에 특정 알림을 설정한 서버 불러오기
         result = await discord_server_repo.get_channel_id_notice_dormitory_all()

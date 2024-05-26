@@ -24,8 +24,9 @@ class AsyncSqlAlchemyDiscordServerRepository(DiscordServerRepository):
         result = await self.session.execute(select(DiscordServer).filter_by(id=server_id))
         return result.scalar_one_or_none()
 
-    def add(self, server: DiscordServer):
+    async def add(self, server: DiscordServer):
         self.session.add(server)
+        await self.session.commit()
 
     async def update(self, server: DiscordServer) -> bool:
         target_server = await self.get_by_id(server.id)
@@ -38,11 +39,12 @@ class AsyncSqlAlchemyDiscordServerRepository(DiscordServerRepository):
             await self.session.flush()  # session.dirty == True로 만들어서 변경사항 반영
             return True
         else:
-            self.add(server)
+            await self.add(server)
             return False
 
     async def delete(self, server_id: int) -> bool:
         result = await self.session.execute(delete(DiscordServer).filter_by(id=server_id))
+        await self.session.commit()
         return True if result.rowcount != 0 else False
 
     async def clear_channel_id(self, server_id: int, column_names: tuple) -> bool:
