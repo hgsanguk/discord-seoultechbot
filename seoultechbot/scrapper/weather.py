@@ -34,8 +34,8 @@ async def fetch(target_time: datetime) -> dict:
     params = {'serviceKey': os.getenv('STBOT_WEATHER_API_TOKEN'), 'dataType': 'JSON', 'numOfRows': '1000',
               'base_date': base_time.strftime('%Y%m%d'), 'base_time': base_time.strftime('%H') + '30',
               'nx': '62', 'ny': '128'}
+    session = ClientSession(timeout=ClientTimeout(total=10))
     try:
-        session = ClientSession(timeout=ClientTimeout(total=10))
         async with session.get(url, params=params) as response:
             if response.status != 200:
                 raise HttpProcessingError(code=response.status, message='HTTP 오류 발생')
@@ -83,4 +83,5 @@ async def fetch(target_time: datetime) -> dict:
         logger.exception(f"공공데이터포털의 응답시간 초과: {e}")
     except Exception as e:
         logger.exception(f"공공데이터포털에서 알 수 없는 오류 발생: {e}")
+    await session.close()
     return {}
