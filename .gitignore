@@ -5,10 +5,10 @@
 # IDE
 /.idea
 
-# DB Files
+# SeoulTechBot Data
+/data
 *.db
-
-# SeoulTechBot logs
+*.db-journal
 *.log
 *.log.*
 
